@@ -1,0 +1,22 @@
+# Imagen de DESARROLLO para docker-compose (NO se usa en Cloud Run).
+# Instala todas las dependencias, sincroniza el esquema con la BD y arranca
+# el servidor en modo watch con recarga en caliente.
+FROM node:20-slim
+WORKDIR /app
+
+# Prisma necesita openssl
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+COPY package*.json ./
+RUN npm install
+
+COPY prisma ./prisma
+RUN npx prisma generate
+
+COPY . .
+
+EXPOSE 8080
+
+# db push crea las tablas desde schema.prisma (sin necesitar migraciones),
+# luego siembra datos y levanta el server con recarga.
+CMD ["sh", "-c", "npx prisma db push && npm run prisma:seed && npm run start:dev"]

@@ -1,0 +1,64 @@
+# =============================================================================
+# Docker Compose — SOLO para desarrollo local.
+# Levanta base de datos + backend + frontend con un comando:  docker compose up
+#
+# Esto NO afecta el despliegue en producción:
+#   - Backend  -> Cloud Run usa backend/Dockerfile (producción)
+#   - Frontend -> Vercel construye desde frontend/ (ignora Dockerfiles)
+#   - BD       -> Neon (vía DATABASE_URL); aquí usamos Postgres en contenedor
+# =============================================================================
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chilate
+      POSTGRES_PASSWORD: chilate
+      POSTGRES_DB: chilate
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chilate"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://chilate:chilate@db:5432/chilate?schema=public
+      JWT_SECRET: dev-secret-cambia-esto-en-produccion
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGINS: http://localhost:5173
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:8080/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

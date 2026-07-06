@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "shop": "Shop",
+    "cart": "Cart",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "admin": "Admin"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout"
+  },
+  "checkout": {
+    "title": "Checkout (simulated)",
+    "name": "Name",
+    "address": "Address",
+    "phone": "Phone",
+    "card": "Card number",
+    "pay": "Pay now",
+    "processing": "Processing...",
+    "approved": "Payment approved! Reference:",
+    "declined": "Payment declined. Try another card."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "banners": "Banners",
+    "content": "Content"
+  },
+  "common": {
+    "addToCart": "Add to cart",
+    "size": "Size",
+    "color": "Color",
+    "outOfStock": "Out of stock",
+    "loading": "Loading..."
+  }
+}

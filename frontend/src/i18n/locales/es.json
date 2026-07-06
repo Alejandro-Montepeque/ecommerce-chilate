@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "shop": "Tienda",
+    "cart": "Carrito",
+    "login": "Ingresar",
+    "logout": "Salir",
+    "admin": "Administración"
+  },
+  "cart": {
+    "title": "Tu carrito",
+    "empty": "Tu carrito está vacío",
+    "subtotal": "Subtotal",
+    "checkout": "Pagar"
+  },
+  "checkout": {
+    "title": "Pago (simulado)",
+    "name": "Nombre",
+    "address": "Dirección",
+    "phone": "Teléfono",
+    "card": "Número de tarjeta",
+    "pay": "Pagar ahora",
+    "processing": "Procesando...",
+    "approved": "¡Pago aprobado! Referencia:",
+    "declined": "Pago rechazado. Intenta con otra tarjeta."
+  },
+  "admin": {
+    "dashboard": "Panel",
+    "products": "Productos",
+    "banners": "Banners",
+    "content": "Contenido"
+  },
+  "common": {
+    "addToCart": "Agregar al carrito",
+    "size": "Talla",
+    "color": "Color",
+    "outOfStock": "Agotado",
+    "loading": "Cargando..."
+  }
+}

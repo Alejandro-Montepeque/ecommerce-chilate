@@ -1,0 +1,161 @@
+// Esquema Prisma — Chilate ecommerce
+// Base de datos: PostgreSQL (Neon)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  MAINTENANCE
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID_SIMULATED
+  CANCELLED
+  FULFILLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String // hash bcrypt
+  fullName  String?
+  role      Role     @default(CUSTOMER)
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  slug      String    @unique
+  nameEs    String
+  nameEn    String
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Collection {
+  id            String              @id @default(uuid())
+  slug          String              @unique
+  nameEs        String
+  nameEn        String
+  descriptionEs String?
+  descriptionEn String?
+  isActive      Boolean             @default(true)
+  products      ProductCollection[]
+  createdAt     DateTime            @default(now())
+}
+
+model Product {
+  id            String              @id @default(uuid())
+  slug          String              @unique
+  nameEs        String
+  nameEn        String
+  descriptionEs String?
+  descriptionEn String?
+  priceUsd      Decimal             @db.Decimal(10, 2)
+  isPublished   Boolean             @default(false)
+  category      Category?           @relation(fields: [categoryId], references: [id])
+  categoryId    String?
+  variants      ProductVariant[]
+  images        ProductImage[]
+  collections   ProductCollection[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+}
+
+model ProductCollection {
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId    String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+
+  @@id([productId, collectionId])
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  url       String
+  altEs     String?
+  altEn     String?
+  sortOrder Int     @default(0)
+}
+
+// Variante = combinación talla/color con su propio inventario
+model ProductVariant {
+  id               String      @id @default(uuid())
+  product          Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId        String
+  sku              String?     @unique
+  size             String?
+  color            String?
+  colorHex         String?
+  priceOverrideUsd Decimal?    @db.Decimal(10, 2)
+  stock            Int         @default(0)
+  isActive         Boolean     @default(true)
+  orderItems       OrderItem[]
+
+  @@unique([productId, size, color])
+}
+
+// Contenido editable de la landing (autogestión)
+model Banner {
+  id         String   @id @default(uuid())
+  titleEs    String?
+  titleEn    String?
+  subtitleEs String?
+  subtitleEn String?
+  imageUrl   String?
+  linkUrl    String?
+  sortOrder  Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+model SiteContent {
+  key       String   @id // ej. hero_title, footer_about
+  valueEs   String?
+  valueEn   String?
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  user            User?       @relation(fields: [userId], references: [id])
+  userId          String?
+  guestEmail      String?
+  status          OrderStatus @default(PENDING)
+  currency        String      @default("USD")
+  subtotalUsd     Decimal     @db.Decimal(10, 2)
+  totalUsd        Decimal     @db.Decimal(10, 2)
+  shippingName    String?
+  shippingAddress String?
+  shippingPhone   String?
+  paymentRef      String?
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+}
+
+model OrderItem {
+  id           String          @id @default(uuid())
+  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId      String
+  variant      ProductVariant? @relation(fields: [variantId], references: [id])
+  variantId    String?
+  productName  String
+  size         String?
+  color        String?
+  unitPriceUsd Decimal         @db.Decimal(10, 2)
+  quantity     Int
+}

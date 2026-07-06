@@ -1,0 +1,21 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+build/
+
+# Entornos
+.env
+.env.local
+.env.*.local
+
+# Prisma
+backend/prisma/*.db
+
+# Sistema / editor
+.DS_Store
+*.log
+.vercel
+.idea
+.vscode
