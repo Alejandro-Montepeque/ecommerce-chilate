@@ -47,6 +47,13 @@ export interface ProductImage {
   sortOrder: number;
 }
 
+export interface Discount {
+  id?: string;
+  percent: number;
+  startsAt: string;
+  endsAt: string;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -57,8 +64,10 @@ export interface Product {
   priceUsd: string; // Prisma Decimal llega como string
   isPublished: boolean;
   categoryId?: string | null;
+  subcategory?: "HOMBRE" | "MUJER" | "UNISEX" | null;
   variants?: ProductVariant[];
   images?: ProductImage[];
+  discounts?: Discount[]; // descuento(s) activo(s)
 }
 
 export interface Banner {

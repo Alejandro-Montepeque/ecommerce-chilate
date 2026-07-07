@@ -14,6 +14,8 @@ import { ContentModule } from "./content/content.module";
 import { OrdersModule } from "./orders/orders.module";
 import { PaymentsModule } from "./payments/payments.module";
 import { UploadsModule } from "./uploads/uploads.module";
+import { WishlistModule } from "./wishlist/wishlist.module";
+import { DiscountsModule } from "./discounts/discounts.module";
 import { MailModule } from "./mail/mail.module";
 import { HealthController } from "./health.controller";
 
@@ -33,6 +35,8 @@ import { HealthController } from "./health.controller";
     OrdersModule,
     PaymentsModule,
     UploadsModule,
+    WishlistModule,
+    DiscountsModule,
     MailModule,
   ],
   controllers: [HealthController],

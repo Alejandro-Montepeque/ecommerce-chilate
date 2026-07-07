@@ -24,13 +24,44 @@ enum OrderStatus {
   FULFILLED
 }
 
+// Subcategoría fija del producto (para navegar Categoría › Subcategoría).
+enum Subcategory {
+  HOMBRE
+  MUJER
+  UNISEX
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String         @id @default(uuid())
+  email     String         @unique
   password  String // hash bcrypt
   fullName  String?
-  role      Role     @default(CUSTOMER)
+  role      Role           @default(CUSTOMER)
   orders    Order[]
+  wishlist  WishlistItem[]
+  createdAt DateTime       @default(now())
+}
+
+// Lista de deseos (por usuario autenticado).
+model WishlistItem {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+// Descuento programado por producto (con rango de fechas).
+model Discount {
+  id        String   @id @default(uuid())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  percent   Int // 1-100
+  startsAt  DateTime
+  endsAt    DateTime
   createdAt DateTime @default(now())
 }
 
@@ -84,9 +115,12 @@ model Product {
   isPublished   Boolean             @default(false)
   category      Category?           @relation(fields: [categoryId], references: [id])
   categoryId    String?
+  subcategory   Subcategory? // Hombre / Mujer / Unisex (opcional)
   variants      ProductVariant[]
   images        ProductImage[]
   collections   ProductCollection[]
+  discounts     Discount[]
+  wishlistItems WishlistItem[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 }

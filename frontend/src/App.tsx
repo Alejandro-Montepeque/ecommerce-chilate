@@ -9,11 +9,13 @@ import ShopPage from "@/pages/store/ShopPage";
 import CartPage from "@/pages/store/CartPage";
 import CheckoutPage from "@/pages/store/CheckoutPage";
 import ThankYouPage from "@/pages/store/ThankYouPage";
+import WishlistPage from "@/pages/store/WishlistPage";
 import LoginPage from "@/pages/store/LoginPage";
 import DashboardPage from "@/pages/admin/DashboardPage";
 import ProductsAdminPage from "@/pages/admin/ProductsAdminPage";
 import ProductFormPage from "@/pages/admin/ProductFormPage";
 import CatalogsAdminPage from "@/pages/admin/CatalogsAdminPage";
+import DiscountsAdminPage from "@/pages/admin/DiscountsAdminPage";
 import BannersAdminPage from "@/pages/admin/BannersAdminPage";
 import ContentAdminPage from "@/pages/admin/ContentAdminPage";
 import UsersAdminPage from "@/pages/admin/UsersAdminPage";
@@ -27,6 +29,7 @@ export default function App() {
         <Route path="/carrito" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/pedido-confirmado" element={<ThankYouPage />} />
+        <Route path="/favoritos" element={<WishlistPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Route>
 
@@ -68,6 +71,14 @@ export default function App() {
           element={
             <RequireRole roles={["ADMIN", "CATALOG"]}>
               <CatalogsAdminPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="descuentos"
+          element={
+            <RequireRole roles={["ADMIN", "CATALOG"]}>
+              <DiscountsAdminPage />
             </RequireRole>
           }
         />

@@ -2,11 +2,13 @@ import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
 } from "class-validator";
+import { Subcategory } from "@prisma/client";
 
 export class VariantDto {
   @IsOptional() @IsString() sku?: string;
@@ -32,6 +34,7 @@ export class CreateProductDto {
   @IsNumber() priceUsd!: number;
   @IsOptional() @IsBoolean() isPublished?: boolean;
   @IsOptional() @IsString() categoryId?: string;
+  @IsOptional() @IsEnum(Subcategory) subcategory?: Subcategory;
 
   @IsOptional()
   @IsArray()

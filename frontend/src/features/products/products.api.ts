@@ -23,6 +23,7 @@ export interface ProductInput {
   priceUsd: number;
   isPublished?: boolean;
   categoryId?: string;
+  subcategory?: "HOMBRE" | "MUJER" | "UNISEX";
   variants?: VariantInput[];
   images?: ImageInput[];
 }

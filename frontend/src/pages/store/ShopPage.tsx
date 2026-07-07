@@ -6,6 +6,11 @@ import {
   useCategories,
 } from "@/features/products/products.queries";
 import { ProductCard } from "@/features/products/ProductCard";
+import {
+  SUBCATEGORIES,
+  subcategoryLabel,
+  type Subcategory,
+} from "@/features/products/subcategory";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function ShopPage() {
@@ -14,12 +19,15 @@ export default function ShopPage() {
   const { data: products = [], isLoading } = usePublishedProducts();
   const { data: categories = [] } = useCategories();
   const [category, setCategory] = useState<string | null>(null);
+  const [sub, setSub] = useState<Subcategory | null>(null);
 
   if (isLoading) return <Spinner />;
 
-  const filtered = category
-    ? products.filter((p) => p.categoryId === category)
-    : products;
+  const filtered = products.filter(
+    (p) =>
+      (!category || p.categoryId === category) &&
+      (!sub || p.subcategory === sub),
+  );
 
   const chip = (active: boolean) =>
     `rounded-full border px-4 py-1.5 text-sm transition-colors ${
@@ -41,7 +49,7 @@ export default function ShopPage() {
 
       {/* Filtro de categorías */}
       {categories.length > 0 && (
-        <div className="mb-8 flex flex-wrap gap-2">
+        <div className="mb-3 flex flex-wrap gap-2">
           <button onClick={() => setCategory(null)} className={chip(!category)}>
             {t("shop.all")}
           </button>
@@ -56,6 +64,18 @@ export default function ShopPage() {
           ))}
         </div>
       )}
+
+      {/* Filtro de subcategoría (Hombre / Mujer / Unisex) */}
+      <div className="mb-8 flex flex-wrap gap-2">
+        <button onClick={() => setSub(null)} className={chip(!sub)}>
+          {t("shop.allSub")}
+        </button>
+        {SUBCATEGORIES.map((s) => (
+          <button key={s} onClick={() => setSub(s)} className={chip(sub === s)}>
+            {subcategoryLabel(s, lang)}
+          </button>
+        ))}
+      </div>
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-300 p-16 text-center text-zinc-500">

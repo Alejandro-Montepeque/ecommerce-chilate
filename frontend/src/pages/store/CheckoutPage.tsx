@@ -8,6 +8,13 @@ import { useCart } from "@/features/cart/useCart";
 import { useAuth } from "@/context/AuthContext";
 import { useCheckout } from "@/features/orders/orders.queries";
 import { alerts } from "@/lib/alerts";
+import {
+  formatCardNumber,
+  formatExpiry,
+  formatCvc,
+  formatPhone,
+  onlyDigits,
+} from "@/lib/masks";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -22,17 +29,35 @@ export default function CheckoutPage() {
   const schema = useMemo(
     () =>
       z.object({
-        name: z.string().min(2, "Ingresa tu nombre"),
+        // Con sesión no pedimos nombre ni correo: usamos los de la cuenta.
+        name: user
+          ? z.string().optional()
+          : z.string().min(2, "Ingresa tu nombre"),
         email: user
           ? z.string().optional()
           : z.string().email("Correo inválido"),
         address: z.string().min(5, "Ingresa una dirección válida"),
-        phone: z.string().min(6, "Ingresa un teléfono válido"),
+        phone: z
+          .string()
+          .refine((v) => onlyDigits(v).length === 8, "Teléfono de 8 dígitos"),
         card: z
           .string()
-          .refine((v) => v.replace(/\D/g, "").length >= 12, "Tarjeta inválida"),
-        exp: z.string().min(3, "MM/AA"),
-        cvc: z.string().min(3, "CVC"),
+          .refine(
+            (v) => onlyDigits(v).length >= 15,
+            "Número de tarjeta inválido",
+          ),
+        exp: z
+          .string()
+          .regex(/^\d{2}\/\d{2}$/, "Formato MM/AA")
+          .refine((v) => {
+            const mm = Number(v.slice(0, 2));
+            return mm >= 1 && mm <= 12;
+          }, "Mes inválido")
+          .refine(
+            (v) => 2000 + Number(v.slice(3, 5)) >= new Date().getFullYear() + 1,
+            "Ingresa un año válido",
+          ),
+        cvc: z.string().regex(/^\d{3,4}$/, "CVC de 3 o 4 dígitos"),
       }),
     [user],
   );
@@ -41,18 +66,28 @@ export default function CheckoutPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  // Aplica una máscara al escribir, manteniendo el valor sincronizado con RHF.
+  const masked =
+    (field: keyof FormValues, format: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setValue(field, format(e.target.value), { shouldValidate: false });
 
   const onSubmit = handleSubmit(async (form) => {
     // Capturamos el resumen antes de vaciar el carrito.
     const snapshot = [...items];
     const totalSnapshot = total;
     const email = user?.email ?? form.email;
+    const shippingName = user
+      ? (user.fullName ?? user.email)
+      : (form.name ?? "");
     try {
       const order = await checkout.mutateAsync({
         guestEmail: user ? undefined : form.email,
-        shippingName: form.name,
+        shippingName,
         shippingAddress: form.address,
         shippingPhone: form.phone,
         items: items.map((i) => ({
@@ -94,22 +129,40 @@ export default function CheckoutPage() {
             <legend className="px-1 text-sm font-medium text-zinc-500">
               {t("checkout.address")}
             </legend>
-            <div>
-              <Input label={t("checkout.name")} {...register("name")} />
-              {err(errors.name?.message)}
-            </div>
-            {!user && (
-              <div>
-                <Input label="Email" type="email" {...register("email")} />
-                {err(errors.email?.message)}
-              </div>
+            {user ? (
+              <p className="rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+                Comprando como{" "}
+                <span className="font-medium text-zinc-900">
+                  {user.fullName ?? user.email}
+                </span>{" "}
+                · {user.email}
+              </p>
+            ) : (
+              <>
+                <div>
+                  <Input label={t("checkout.name")} {...register("name")} />
+                  {err(errors.name?.message)}
+                </div>
+                <div>
+                  <Input label="Email" type="email" {...register("email")} />
+                  {err(errors.email?.message)}
+                </div>
+              </>
             )}
             <div>
               <Input label={t("checkout.address")} {...register("address")} />
               {err(errors.address?.message)}
             </div>
             <div>
-              <Input label={t("checkout.phone")} {...register("phone")} />
+              <Input
+                label={t("checkout.phone")}
+                type="tel"
+                inputMode="numeric"
+                placeholder="0000-0000"
+                maxLength={9}
+                {...register("phone")}
+                onChange={masked("phone", formatPhone)}
+              />
               {err(errors.phone?.message)}
             </div>
           </fieldset>
@@ -125,18 +178,35 @@ export default function CheckoutPage() {
             <div>
               <Input
                 label={t("checkout.card")}
+                inputMode="numeric"
                 placeholder="4242 4242 4242 4242"
+                maxLength={19}
                 {...register("card")}
+                onChange={masked("card", formatCardNumber)}
               />
               {err(errors.card?.message)}
             </div>
             <div className="flex gap-3">
               <div className="flex-1">
-                <Input label="MM/AA" {...register("exp")} />
+                <Input
+                  label="MM/AA"
+                  inputMode="numeric"
+                  placeholder="MM/AA"
+                  maxLength={5}
+                  {...register("exp")}
+                  onChange={masked("exp", formatExpiry)}
+                />
                 {err(errors.exp?.message)}
               </div>
               <div className="flex-1">
-                <Input label="CVC" {...register("cvc")} />
+                <Input
+                  label="CVC"
+                  inputMode="numeric"
+                  placeholder="123"
+                  maxLength={4}
+                  {...register("cvc")}
+                  onChange={masked("cvc", formatCvc)}
+                />
                 {err(errors.cvc?.message)}
               </div>
             </div>

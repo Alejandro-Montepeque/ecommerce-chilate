@@ -1,10 +1,22 @@
 {
   "nav": {
+    "home": "Inicio",
     "shop": "Tienda",
     "cart": "Carrito",
+    "wishlist": "Favoritos",
     "login": "Ingresar",
     "logout": "Salir",
     "admin": "Administración"
+  },
+  "discount": {
+    "bannerStarts": "Los descuentos en ropa y accesorios comenzarán en",
+    "bannerActive": "¡Descuentos activos! Hasta -{{percent}}%",
+    "bannerEndsIn": "Terminan en"
+  },
+  "wishlist": {
+    "title": "Tus favoritos",
+    "empty": "Aún no tienes productos favoritos.",
+    "loginRequired": "Inicia sesión para ver tus favoritos."
   },
   "announcement": "Envío a todo El Salvador · Paga contra entrega o en línea",
   "home": {
@@ -26,6 +38,7 @@
   },
   "shop": {
     "all": "Todo",
+    "allSub": "Todos",
     "empty": "No hay productos en esta categoría."
   },
   "cart": {

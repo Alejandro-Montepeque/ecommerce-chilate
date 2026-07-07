@@ -8,6 +8,7 @@ import {
   useCategories,
 } from "@/features/products/products.queries";
 import { ProductCard } from "@/features/products/ProductCard";
+import { DiscountBanner } from "@/features/discounts/DiscountBanner";
 import { Button } from "@/components/ui/Button";
 import { TruckIcon, ShieldIcon, RefreshIcon } from "@/components/ui/icons";
 
@@ -26,16 +27,18 @@ export default function HomePage() {
 
   return (
     <div className="space-y-16">
+      <DiscountBanner />
+
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 via-brand-600 to-brand-900 px-8 py-16 text-white sm:px-14 sm:py-24">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-brand-800 px-8 py-16 text-white sm:px-14 sm:py-24">
         <div className="relative z-10 max-w-xl">
-          <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-medium">
+          <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
             Chilate · SV
           </span>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
             {hero ? localized(hero, "value", lang) : "Chilate"}
           </h1>
-          <p className="mt-4 text-lg text-brand-100">
+          <p className="mt-4 text-lg text-brand-50">
             {heroSub ? localized(heroSub, "value", lang) : ""}
           </p>
           <Link to="/tienda" className="mt-8 inline-block">
@@ -176,12 +179,12 @@ function Benefit({
   );
 }
 
-// Colores rotativos para las tarjetas de categoría.
+// Colores rotativos para las tarjetas de categoría (rosa · salvia · taupe).
 function categoryColor(i: number) {
   const colors = [
     "bg-gradient-to-br from-brand-500 to-brand-700",
-    "bg-gradient-to-br from-zinc-700 to-zinc-900",
-    "bg-gradient-to-br from-brand-600 to-brand-900",
+    "bg-gradient-to-br from-sage-400 to-sage-600",
+    "bg-gradient-to-br from-zinc-600 to-zinc-800",
   ];
   return colors[i % colors.length];
 }

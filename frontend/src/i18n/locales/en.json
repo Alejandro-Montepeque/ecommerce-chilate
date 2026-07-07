@@ -1,10 +1,22 @@
 {
   "nav": {
+    "home": "Home",
     "shop": "Shop",
     "cart": "Cart",
+    "wishlist": "Wishlist",
     "login": "Sign in",
     "logout": "Sign out",
     "admin": "Admin"
+  },
+  "discount": {
+    "bannerStarts": "Discounts on clothing and accessories start in",
+    "bannerActive": "Discounts live now! Up to -{{percent}}%",
+    "bannerEndsIn": "Ends in"
+  },
+  "wishlist": {
+    "title": "Your wishlist",
+    "empty": "You don't have any favorites yet.",
+    "loginRequired": "Sign in to see your wishlist."
   },
   "announcement": "Shipping across El Salvador · Pay on delivery or online",
   "home": {
@@ -26,6 +38,7 @@
   },
   "shop": {
     "all": "All",
+    "allSub": "All",
     "empty": "No products in this category."
   },
   "cart": {

@@ -53,83 +53,85 @@ export default function ProductsAdminPage() {
             Aún no hay productos. Crea el primero.
           </p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-100 bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
-                <th className="px-5 py-3 font-medium">Producto</th>
-                <th className="px-5 py-3 font-medium">Precio</th>
-                <th className="px-5 py-3 font-medium">Stock</th>
-                <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {products.map((p) => (
-                <tr key={p.id} className="hover:bg-zinc-50/50">
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
-                        {p.images?.[0] && (
-                          <img
-                            src={resolveImageUrl(p.images[0].url)}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
-                        )}
-                      </div>
-                      <span className="font-medium text-zinc-900">
-                        {p.nameEs}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-zinc-600">
-                    ${Number(p.priceUsd).toFixed(2)}
-                  </td>
-                  <td className="px-5 py-3 text-zinc-600">{stockOf(p)}</td>
-                  <td className="px-5 py-3">
-                    {p.isPublished ? (
-                      <Badge tone="success">Publicado</Badge>
-                    ) : (
-                      <Badge>Borrador</Badge>
-                    )}
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="flex justify-end gap-1">
-                      <Link to={`/admin/productos/${p.id}/editar`}>
-                        <Button size="sm" variant="secondary">
-                          Editar
-                        </Button>
-                      </Link>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => togglePublish(p)}
-                      >
-                        {p.isPublished ? "Despublicar" : "Publicar"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={async () => {
-                          const ok = await alerts.confirm(
-                            `¿Eliminar "${p.nameEs}"?`,
-                            "Esta acción no se puede deshacer.",
-                          );
-                          if (ok)
-                            deleteProduct.mutate(p.id, {
-                              onSuccess: () =>
-                                alerts.success("Producto eliminado"),
-                            });
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
+                  <th className="px-5 py-3 font-medium">Producto</th>
+                  <th className="px-5 py-3 font-medium">Precio</th>
+                  <th className="px-5 py-3 font-medium">Stock</th>
+                  <th className="px-5 py-3 font-medium">Estado</th>
+                  <th className="px-5 py-3"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {products.map((p) => (
+                  <tr key={p.id} className="hover:bg-zinc-50/50">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
+                          {p.images?.[0] && (
+                            <img
+                              src={resolveImageUrl(p.images[0].url)}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </div>
+                        <span className="font-medium text-zinc-900">
+                          {p.nameEs}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 text-zinc-600">
+                      ${Number(p.priceUsd).toFixed(2)}
+                    </td>
+                    <td className="px-5 py-3 text-zinc-600">{stockOf(p)}</td>
+                    <td className="px-5 py-3">
+                      {p.isPublished ? (
+                        <Badge tone="success">Publicado</Badge>
+                      ) : (
+                        <Badge>Borrador</Badge>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex justify-end gap-1">
+                        <Link to={`/admin/productos/${p.id}/editar`}>
+                          <Button size="sm" variant="secondary">
+                            Editar
+                          </Button>
+                        </Link>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => togglePublish(p)}
+                        >
+                          {p.isPublished ? "Despublicar" : "Publicar"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={async () => {
+                            const ok = await alerts.confirm(
+                              `¿Eliminar "${p.nameEs}"?`,
+                              "Esta acción no se puede deshacer.",
+                            );
+                            if (ok)
+                              deleteProduct.mutate(p.id, {
+                                onSuccess: () =>
+                                  alerts.success("Producto eliminado"),
+                              });
+                          }}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

@@ -53,7 +53,7 @@ function Categories() {
   const [en, setEn] = useState("");
 
   const add = () => {
-    if (!es.trim()) return;
+    if (!es.trim()) return alerts.error("Ingresa el nombre de la categoría.");
     create.mutate(
       { slug: slugify(es), nameEs: es, nameEn: en || es },
       {
@@ -122,7 +122,7 @@ function Colors() {
   const [hex, setHex] = useState("#111111");
 
   const add = () => {
-    if (!name.trim()) return;
+    if (!name.trim()) return alerts.error("Ingresa el nombre del color.");
     create.mutate(
       { name, hex },
       {
@@ -199,7 +199,7 @@ function Sizes() {
   const [label, setLabel] = useState("");
 
   const add = () => {
-    if (!label.trim()) return;
+    if (!label.trim()) return alerts.error("Ingresa la talla.");
     create.mutate(label.trim().toUpperCase(), {
       onSuccess: () => {
         setLabel("");

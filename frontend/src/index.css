@@ -8,38 +8,93 @@
     text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-zinc-50 text-zinc-800;
+    @apply bg-zinc-50 font-sans text-zinc-800;
+  }
+  /* Títulos un poco más marcados y con menos tracking (estética boutique). */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.01em;
+  }
+  /* Foco visible y cálido en toda la app. */
+  :focus-visible {
+    outline: none;
   }
 }
 
-/* Iconos de SweetAlert2 alineados a la paleta del ecommerce */
+/* ==========================================================================
+   SweetAlert2 — tema "Chilate boutique" (rosa palo + salvia, cálido).
+   El wrapper en lib/alerts.ts usa buttonsStyling:false + customClass Tailwind;
+   aquí ajustamos el popup, iconos y detalles que no se pueden dar por clase.
+   ========================================================================== */
+.swal2-container {
+  padding: 1rem;
+}
+.swal2-popup {
+  font-family:
+    "Nunito Variable", Nunito, ui-rounded, system-ui, sans-serif !important;
+  padding: 1.75rem 1.75rem 1.5rem !important;
+}
+.swal2-popup.swal2-toast {
+  padding: 0.75rem 1rem !important;
+  background: #fffdfb !important;
+}
+.swal2-title {
+  padding-top: 0.25rem !important;
+}
+.swal2-html-container {
+  margin-top: 0.25rem !important;
+}
+
+/* Backdrop con tinte cálido en vez de negro plano. */
+.swal2-container.swal2-backdrop-show {
+  background: rgba(44, 37, 33, 0.45);
+}
+
+/* --- Iconos con la paleta de la marca --- */
 .swal2-icon.swal2-success {
-  border-color: #a7f3d0;
-  color: #10b981;
+  border-color: #d0dbbf;
+  color: #687c57;
 }
 .swal2-icon.swal2-success .swal2-success-ring {
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(156, 175, 136, 0.35);
 }
 .swal2-icon.swal2-success [class^="swal2-success-line"] {
-  background-color: #10b981;
+  background-color: #687c57;
 }
 .swal2-icon.swal2-error {
-  border-color: #fecaca;
-  color: #ef4444;
+  border-color: #edc9c9;
+  color: #a85c60;
 }
 .swal2-icon.swal2-error .swal2-x-mark-line-left,
 .swal2-icon.swal2-error .swal2-x-mark-line-right {
-  background-color: #ef4444;
+  background-color: #a85c60;
 }
 .swal2-icon.swal2-warning {
-  border-color: #fde68a;
-  color: #f59e0b;
+  border-color: #eaddc4;
+  color: #b78a3f;
 }
 .swal2-icon.swal2-info,
 .swal2-icon.swal2-question {
-  border-color: #c7d2fe;
-  color: #4f46e5;
+  border-color: #edc9c9;
+  color: #a85c60;
 }
 .swal2-timer-progress-bar {
-  background: #4f46e5;
+  background: #a85c60;
+}
+
+/* Barra de scroll sutil y cálida (webkit). */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d8cabf;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b7a79c;
+  background-clip: content-box;
 }

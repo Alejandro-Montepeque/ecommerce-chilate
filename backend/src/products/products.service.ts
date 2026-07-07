@@ -6,11 +6,22 @@ import { CreateProductDto, UpdateProductDto } from "./dto/product.dto";
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  // Catálogo público: solo productos publicados.
+  // Catálogo público: solo productos publicados. Incluye el descuento activo
+  // (si la fecha actual está dentro de su rango) para calcular el precio.
   findPublished() {
+    const now = new Date();
     return this.prisma.product.findMany({
       where: { isPublished: true },
-      include: { variants: true, images: true, category: true },
+      include: {
+        variants: true,
+        images: true,
+        category: true,
+        discounts: {
+          where: { startsAt: { lte: now }, endsAt: { gte: now } },
+          orderBy: { percent: "desc" },
+          take: 1,
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   }

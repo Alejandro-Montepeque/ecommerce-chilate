@@ -22,6 +22,8 @@ export default function ContentAdminPage() {
   const { data, isLoading } = useSiteContent();
   const updateContent = useUpdateContent();
   const [values, setValues] = useState<Values>({});
+  // Snapshot de lo cargado, para detectar si hubo cambios.
+  const [initial, setInitial] = useState<Values>({});
   const [tab, setTab] = useState<ContentGroup>("brand");
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export default function ContentAdminPage() {
       };
     });
     setValues(map);
+    setInitial(structuredClone(map));
   }, [data]);
 
   if (isLoading) return <Spinner />;
@@ -48,11 +51,30 @@ export default function ContentAdminPage() {
   const update = (key: string, field: "valueEs" | "valueEn", v: string) =>
     setValues((prev) => ({ ...prev, [key]: { ...prev[key], [field]: v } }));
 
-  const save = (key: string) =>
+  // ¿Hay cambios respecto a lo cargado?
+  const isDirty = (key: string) =>
+    values[key]?.valueEs !== initial[key]?.valueEs ||
+    values[key]?.valueEn !== initial[key]?.valueEn;
+
+  // Vacío = el campo principal (español) sin contenido.
+  const isEmpty = (key: string) => !values[key]?.valueEs?.trim();
+
+  const save = (key: string) => {
+    if (isEmpty(key)) return alerts.error("El campo no puede quedar vacío.");
+    if (!isDirty(key)) return alerts.info("No hay cambios que guardar.");
     updateContent.mutate(
       { key, valueEs: values[key]?.valueEs, valueEn: values[key]?.valueEn },
-      { onSuccess: () => alerts.success("Guardado") },
+      {
+        onSuccess: () => {
+          // Marca este campo como "sin cambios" tras guardar.
+          setInitial((prev) => ({ ...prev, [key]: { ...values[key] } }));
+          alerts.success("Guardado");
+        },
+        onError: (e) =>
+          alerts.error(e instanceof Error ? e.message : "Error al guardar"),
+      },
     );
+  };
 
   const keysInTab = CONTENT_KEYS.filter((k) => k.group === tab);
 
@@ -113,7 +135,12 @@ export default function ContentAdminPage() {
                   />
                 )}
               </div>
-              <Button size="sm" className="mt-3" onClick={() => save(ck.key)}>
+              <Button
+                size="sm"
+                className="mt-3"
+                onClick={() => save(ck.key)}
+                disabled={!isDirty(ck.key) || isEmpty(ck.key)}
+              >
                 Guardar
               </Button>
             </div>

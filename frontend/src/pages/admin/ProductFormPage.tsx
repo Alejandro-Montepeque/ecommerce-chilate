@@ -16,7 +16,14 @@ import {
   MAX_IMAGE_MB,
 } from "@/features/products/upload";
 import { resolveImageUrl } from "@/features/products/image";
-import type { VariantInput } from "@/features/products/products.api";
+import {
+  SUBCATEGORIES,
+  subcategoryLabel,
+} from "@/features/products/subcategory";
+import type {
+  VariantInput,
+  ProductInput,
+} from "@/features/products/products.api";
 import { alerts } from "@/lib/alerts";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -39,6 +46,7 @@ const schema = z.object({
   descriptionEs: z.string().optional(),
   descriptionEn: z.string().optional(),
   categoryId: z.string().optional(),
+  subcategory: z.string().optional(),
   priceUsd: z.coerce.number().positive("El precio debe ser mayor a 0"),
   isPublished: z.boolean().optional(),
 });
@@ -85,6 +93,7 @@ export default function ProductFormPage() {
       descriptionEs: existing.descriptionEs ?? "",
       descriptionEn: existing.descriptionEn ?? "",
       categoryId: existing.categoryId ?? "",
+      subcategory: existing.subcategory ?? "",
       priceUsd: Number(existing.priceUsd),
       isPublished: existing.isPublished,
     });
@@ -148,7 +157,7 @@ export default function ProductFormPage() {
       return;
     }
 
-    const payload = {
+    const payload: ProductInput = {
       slug: existing?.slug ?? slugify(form.nameEs),
       nameEs: form.nameEs,
       nameEn: form.nameEn || form.nameEs,
@@ -157,6 +166,8 @@ export default function ProductFormPage() {
       priceUsd: form.priceUsd,
       isPublished: form.isPublished,
       categoryId: form.categoryId || undefined,
+      subcategory:
+        (form.subcategory as ProductInput["subcategory"]) || undefined,
       variants,
       images: image ? [{ url: image }] : undefined,
     };
@@ -227,7 +238,7 @@ export default function ProductFormPage() {
             />
           </label>
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <label className="block text-sm">
             <span className="mb-1 block font-medium text-zinc-600">
               Categoría
@@ -237,6 +248,19 @@ export default function ProductFormPage() {
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.nameEs}
+                </option>
+              ))}
+            </Select>
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-zinc-600">
+              Subcategoría
+            </span>
+            <Select {...register("subcategory")}>
+              <option value="">Sin especificar</option>
+              {SUBCATEGORIES.map((s) => (
+                <option key={s} value={s}>
+                  {subcategoryLabel(s, "es")}
                 </option>
               ))}
             </Select>

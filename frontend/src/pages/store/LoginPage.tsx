@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 const schema = z.object({
+  fullName: z.string().optional(),
   email: z.string().email("Correo inválido"),
   password: z.string().min(6, "Mínimo 6 caracteres"),
 });
@@ -25,13 +26,19 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  const onSubmit = handleSubmit(async ({ email, password }) => {
+  const onSubmit = handleSubmit(async (data) => {
+    if (!isLogin && !data.fullName?.trim()) {
+      setError("fullName", { message: "Ingresa tu nombre" });
+      return;
+    }
     try {
-      if (isLogin) await signIn(email, password);
-      else await signUp(email, password);
+      if (isLogin) await signIn(data.email, data.password);
+      else await signUp(data.email, data.password, data.fullName);
       navigate("/");
     } catch (err) {
       alerts.error(err instanceof Error ? err.message : "Error");
@@ -51,6 +58,16 @@ export default function LoginPage() {
         </p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-3" noValidate>
+          {!isLogin && (
+            <div>
+              <Input label="Nombre" {...register("fullName")} />
+              {errors.fullName && (
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.fullName.message}
+                </p>
+              )}
+            </div>
+          )}
           <div>
             <Input label="Email" type="email" {...register("email")} />
             {errors.email && (
@@ -73,7 +90,10 @@ export default function LoginPage() {
         </form>
 
         <button
-          onClick={() => setMode(isLogin ? "up" : "in")}
+          onClick={() => {
+            setMode(isLogin ? "up" : "in");
+            reset();
+          }}
           className="mt-4 text-sm text-brand-600 hover:text-brand-700"
         >
           {isLogin ? "¿No tienes cuenta? Regístrate" : "Ya tengo cuenta"}

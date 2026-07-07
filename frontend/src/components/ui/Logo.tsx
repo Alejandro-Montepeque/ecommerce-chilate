@@ -17,11 +17,11 @@ export function Logo({ showName = true }: { showName?: boolean }) {
 
   return (
     <span className="flex items-center gap-2">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">
+      <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-base font-extrabold text-white shadow-soft">
         C
       </span>
       {showName && (
-        <span className="text-lg font-semibold tracking-tight text-zinc-900">
+        <span className="text-xl font-extrabold tracking-tight text-zinc-900">
           Chilate
         </span>
       )}

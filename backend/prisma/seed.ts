@@ -18,27 +18,34 @@ async function main() {
     },
   });
 
-  // Categorías
-  const mujer = await prisma.category.upsert({
-    where: { slug: "mujer" },
-    update: {},
-    create: { slug: "mujer", nameEs: "Mujer", nameEn: "Women", sortOrder: 1 },
-  });
-  await prisma.category.upsert({
-    where: { slug: "hombre" },
-    update: {},
-    create: { slug: "hombre", nameEs: "Hombre", nameEn: "Men", sortOrder: 2 },
-  });
-  await prisma.category.upsert({
-    where: { slug: "accesorios" },
-    update: {},
-    create: {
+  // Categorías (tipos de producto). Hombre/Mujer/Unisex NO son categorías:
+  // ahora son la "subcategoría" fija de cada producto.
+  const categorias = [
+    { slug: "camisas", nameEs: "Camisas", nameEn: "Shirts", sortOrder: 1 },
+    { slug: "pantalones", nameEs: "Pantalones", nameEn: "Pants", sortOrder: 2 },
+    { slug: "zapatos", nameEs: "Zapatos", nameEn: "Shoes", sortOrder: 3 },
+    {
       slug: "accesorios",
       nameEs: "Accesorios",
       nameEn: "Accessories",
-      sortOrder: 3,
+      sortOrder: 4,
     },
+  ];
+  for (const c of categorias) {
+    await prisma.category.upsert({
+      where: { slug: c.slug },
+      update: { sortOrder: c.sortOrder },
+      create: c,
+    });
+  }
+  const camisas = await prisma.category.findUnique({
+    where: { slug: "camisas" },
   });
+
+  // Limpieza: las antiguas categorías "Mujer"/"Hombre" ya no aplican como
+  // categorías (pasaron a ser subcategoría). Al borrarlas, los productos que
+  // las usaban quedan con categoryId = null (relación opcional).
+  await prisma.category.deleteMany({ where: { slug: { in: ["mujer", "hombre"] } } });
 
   // Contenido de la landing
   const content = [
@@ -142,7 +149,8 @@ async function main() {
         descriptionEn: "100% cotton, regular fit.",
         priceUsd: 18.0,
         isPublished: true,
-        categoryId: mujer.id,
+        categoryId: camisas?.id,
+        subcategory: "UNISEX",
         variants: {
           create: [
             {
@@ -176,6 +184,15 @@ async function main() {
           ],
         },
       },
+    });
+  }
+
+  // Si el producto de ejemplo ya existía apuntando a una categoría eliminada,
+  // lo dejamos en una categoría válida con su subcategoría.
+  if (camisas) {
+    await prisma.product.updateMany({
+      where: { slug: "camiseta-basica" },
+      data: { categoryId: camisas.id, subcategory: "UNISEX" },
     });
   }
 

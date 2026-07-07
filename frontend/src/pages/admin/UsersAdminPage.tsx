@@ -108,61 +108,64 @@ export default function UsersAdminPage() {
 
       {/* Lista */}
       <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-card">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-zinc-100 bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
-              <th className="px-5 py-3 font-medium">Usuario</th>
-              <th className="px-5 py-3 font-medium">Rol</th>
-              <th className="px-5 py-3 font-medium">Cambiar rol</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {users.map((u) => (
-              <tr key={u.id} className="hover:bg-zinc-50/50">
-                <td className="px-5 py-3">
-                  <p className="font-medium text-zinc-900">
-                    {u.fullName || "—"}
-                  </p>
-                  <p className="text-xs text-zinc-500">{u.email}</p>
-                </td>
-                <td className="px-5 py-3">
-                  <Badge tone={roleTone(u.role)}>{u.role}</Badge>
-                </td>
-                <td className="px-5 py-3">
-                  {u.role === "ADMIN" ? (
-                    <span className="text-xs text-zinc-400">
-                      No se puede degradar a un administrador
-                    </span>
-                  ) : (
-                    <Select
-                      value={u.role}
-                      onChange={(e) =>
-                        setRole.mutate(
-                          { id: u.id, role: e.target.value as Role },
-                          {
-                            onSuccess: () => alerts.success("Rol actualizado"),
-                            onError: (err) =>
-                              alerts.error(
-                                err instanceof Error
-                                  ? err.message
-                                  : "No se pudo actualizar",
-                              ),
-                          },
-                        )
-                      }
-                      className="max-w-[10rem]"
-                    >
-                      <option value="CUSTOMER">Cliente</option>
-                      <option value="MAINTENANCE">Mantenimiento</option>
-                      <option value="CATALOG">Catálogo</option>
-                      <option value="ADMIN">Administrador</option>
-                    </Select>
-                  )}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm">
+            <thead>
+              <tr className="border-b border-zinc-100 bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
+                <th className="px-5 py-3 font-medium">Usuario</th>
+                <th className="px-5 py-3 font-medium">Rol</th>
+                <th className="px-5 py-3 font-medium">Cambiar rol</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {users.map((u) => (
+                <tr key={u.id} className="hover:bg-zinc-50/50">
+                  <td className="px-5 py-3">
+                    <p className="font-medium text-zinc-900">
+                      {u.fullName || "—"}
+                    </p>
+                    <p className="text-xs text-zinc-500">{u.email}</p>
+                  </td>
+                  <td className="px-5 py-3">
+                    <Badge tone={roleTone(u.role)}>{u.role}</Badge>
+                  </td>
+                  <td className="px-5 py-3">
+                    {u.role === "ADMIN" ? (
+                      <span className="text-xs text-zinc-400">
+                        No se puede degradar a un administrador
+                      </span>
+                    ) : (
+                      <Select
+                        value={u.role}
+                        onChange={(e) =>
+                          setRole.mutate(
+                            { id: u.id, role: e.target.value as Role },
+                            {
+                              onSuccess: () =>
+                                alerts.success("Rol actualizado"),
+                              onError: (err) =>
+                                alerts.error(
+                                  err instanceof Error
+                                    ? err.message
+                                    : "No se pudo actualizar",
+                                ),
+                            },
+                          )
+                        }
+                        className="max-w-[10rem]"
+                      >
+                        <option value="CUSTOMER">Cliente</option>
+                        <option value="MAINTENANCE">Mantenimiento</option>
+                        <option value="CATALOG">Catálogo</option>
+                        <option value="ADMIN">Administrador</option>
+                      </Select>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

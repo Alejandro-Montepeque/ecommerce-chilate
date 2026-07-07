@@ -31,7 +31,7 @@ export class AuthService {
     });
     // Correo de bienvenida (no bloquea el registro si falla).
     void this.mail.sendWelcome(user.email).catch(() => undefined);
-    return this.sign(user.id, user.email, user.role);
+    return this.sign(user.id, user.email, user.role, user.fullName);
   }
 
   async login(dto: LoginDto) {
@@ -43,7 +43,7 @@ export class AuthService {
     const ok = await bcrypt.compare(dto.password, user.password);
     if (!ok) throw new UnauthorizedException("Credenciales inválidas");
 
-    return this.sign(user.id, user.email, user.role);
+    return this.sign(user.id, user.email, user.role, user.fullName);
   }
 
   async me(userId: string) {
@@ -54,8 +54,13 @@ export class AuthService {
     return user;
   }
 
-  private sign(id: string, email: string, role: string) {
+  private sign(
+    id: string,
+    email: string,
+    role: string,
+    fullName?: string | null,
+  ) {
     const token = this.jwt.sign({ sub: id, email, role });
-    return { accessToken: token, user: { id, email, role } };
+    return { accessToken: token, user: { id, email, role, fullName } };
   }
 }

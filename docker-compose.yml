@@ -31,6 +31,9 @@ services:
       dockerfile: Dockerfile.dev
     restart: unless-stopped
     environment:
+      # Zona horaria del servidor: así "a partir del día siguiente" y las fechas
+      # de los descuentos coinciden con la hora local del usuario (El Salvador).
+      TZ: America/El_Salvador
       DATABASE_URL: postgresql://chilate:chilate@db:5432/chilate?schema=public
       JWT_SECRET: dev-secret-cambia-esto-en-produccion
       JWT_EXPIRES_IN: 7d
@@ -51,7 +54,11 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
+      # node_modules y dist viven DENTRO del contenedor (volúmenes anónimos):
+      # así no se escriben en la carpeta del host (que iCloud sincroniza y
+      # duplica como "dist/prisma 2", rompiendo el build de Nest con ENOTEMPTY).
       - /app/node_modules
+      - /app/dist
       # Credenciales de la service account (montadas de solo lectura)
       - ./backend/ecommercechilate-73d70610d476.json:/secrets/gcp.json:ro
 

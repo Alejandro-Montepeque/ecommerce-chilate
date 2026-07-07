@@ -31,6 +31,9 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Cloud Run inyecta la variable PORT (por defecto 8080)
 ENV PORT=8080
+# Zona horaria: las validaciones de fechas de descuentos usan la hora local del
+# servidor. En Cloud Run define también TZ=America/El_Salvador como variable.
+ENV TZ=America/El_Salvador
 EXPOSE 8080
 
 CMD ["node", "dist/main.js"]
