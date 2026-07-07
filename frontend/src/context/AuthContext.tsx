@@ -53,7 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
-  const isStaff = user?.role === "MAINTENANCE" || user?.role === "ADMIN";
+  const isStaff =
+    user?.role === "MAINTENANCE" ||
+    user?.role === "CATALOG" ||
+    user?.role === "ADMIN";
 
   return (
     <AuthContext.Provider

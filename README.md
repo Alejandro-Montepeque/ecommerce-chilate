@@ -179,6 +179,32 @@ escala a cero: no pagas cuando nadie lo usa.
 
 ---
 
+## Imágenes (Google Cloud Storage)
+
+Las imágenes de producto se suben a un bucket de GCS. Si no se configura, el
+backend responde 503 y el frontend guarda la imagen como base64 (funciona en
+local sin credenciales).
+
+Para activarlo:
+
+1. Crea un bucket (ej. `ecommerce-chilate`).
+2. Hazlo de lectura pública: en **Permisos**, otorga a `allUsers` el rol
+   `Storage Object Viewer` (requiere desactivar "prevenir acceso público" en el
+   bucket). Así las URLs `https://storage.googleapis.com/<bucket>/...` son
+   visibles en la tienda.
+3. Define las variables de entorno del backend:
+   ```
+   GCS_BUCKET=ecommerce-chilate
+   GCS_PROJECT_ID=tu-proyecto-gcp
+   ```
+4. Credenciales:
+   - **Cloud Run:** usa la service account del servicio (dale el rol
+     `Storage Object Admin` sobre el bucket). No necesitas archivo de clave.
+   - **Local:** crea una service account con `Storage Object Admin`, descarga
+     su JSON y exporta `GOOGLE_APPLICATION_CREDENTIALS=/ruta/al.json`.
+
+El endpoint `POST /api/uploads` (solo staff) recibe el archivo y devuelve la URL.
+
 ## Ir a pagos reales
 Reemplaza `PaymentsService.charge()` en `backend/src/payments/payments.service.ts`
 por una integración con Wompi o Stripe, manteniendo la misma firma. El resto del

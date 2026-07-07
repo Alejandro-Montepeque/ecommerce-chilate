@@ -33,26 +33,28 @@ export class ProductsService {
   }
 
   create(dto: CreateProductDto) {
-    const { variants, ...data } = dto;
+    const { variants, images, ...data } = dto;
     return this.prisma.product.create({
       data: {
         ...data,
         variants: variants ? { create: variants } : undefined,
+        images: images ? { create: images } : undefined,
       },
-      include: { variants: true },
+      include: { variants: true, images: true },
     });
   }
 
   async update(id: string, dto: UpdateProductDto) {
-    const { variants, ...data } = dto;
-    // Reemplaza variantes de forma simple: borra e inserta.
+    const { variants, images, ...data } = dto;
+    // Reemplaza variantes e imágenes de forma simple: borra e inserta.
     return this.prisma.product.update({
       where: { id },
       data: {
         ...data,
         variants: variants ? { deleteMany: {}, create: variants } : undefined,
+        images: images ? { deleteMany: {}, create: images } : undefined,
       },
-      include: { variants: true },
+      include: { variants: true, images: true },
     });
   }
 

@@ -32,28 +32,28 @@ export class ProductsController {
 
   // --- Solo staff ---
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN, Role.CATALOG)
   @Get("admin/all")
   findAll() {
     return this.products.findAll();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN, Role.CATALOG)
   @Post()
   create(@Body() dto: CreateProductDto) {
     return this.products.create(dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN, Role.CATALOG)
   @Put(":id")
   update(@Param("id") id: string, @Body() dto: UpdateProductDto) {
     return this.products.update(id, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN, Role.CATALOG)
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.products.remove(id);

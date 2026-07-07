@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { PaymentsService } from "../payments/payments.service";
+import { MailService } from "../mail/mail.service";
 import { CreateOrderDto } from "./dto/order.dto";
 
 @Injectable()
@@ -9,6 +10,7 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private payments: PaymentsService,
+    private mail: MailService,
   ) {}
 
   // Crea la orden, valida inventario, cobra (simulado) y descuenta stock.
@@ -55,8 +57,8 @@ export class OrdersService {
     }
 
     // Transacción: crear orden + items + descontar stock
-    return this.prisma.$transaction(async (tx) => {
-      const order = await tx.order.create({
+    const order = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.order.create({
         data: {
           userId: userId ?? null,
           guestEmail: userId ? null : dto.guestEmail,
@@ -79,7 +81,55 @@ export class OrdersService {
         });
       }
 
-      return order;
+      return created;
+    });
+
+    // Correo de confirmación (no bloquea la respuesta si falla).
+    void this.sendOrderEmail(order, dto, userId).catch(() => undefined);
+
+    return order;
+  }
+
+  // Determina el correo destino y envía la confirmación de compra.
+  private async sendOrderEmail(
+    order: { id: string; paymentRef: string | null; totalUsd: Prisma.Decimal },
+    dto: CreateOrderDto,
+    userId?: string,
+  ) {
+    let to = dto.guestEmail ?? null;
+    if (!to && userId) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true },
+      });
+      to = user?.email ?? null;
+    }
+    if (!to) return;
+
+    const items = await this.prisma.orderItem.findMany({
+      where: { orderId: order.id },
+    });
+
+    await this.mail.sendOrderConfirmation({
+      to,
+      orderId: order.id,
+      paymentRef: order.paymentRef,
+      totalUsd: Number(order.totalUsd),
+      items: (
+        items as {
+          productName: string;
+          size: string | null;
+          color: string | null;
+          unitPriceUsd: Prisma.Decimal;
+          quantity: number;
+        }[]
+      ).map((i) => ({
+        productName: i.productName,
+        size: i.size,
+        color: i.color,
+        unitPriceUsd: Number(i.unitPriceUsd),
+        quantity: i.quantity,
+      })),
     });
   }
 

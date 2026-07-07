@@ -1,4 +1,4 @@
-export type Role = "CUSTOMER" | "MAINTENANCE" | "ADMIN";
+export type Role = "CUSTOMER" | "MAINTENANCE" | "CATALOG" | "ADMIN";
 
 export interface User {
   id: string;
@@ -15,6 +15,19 @@ export interface Category {
   sortOrder: number;
 }
 
+export interface Size {
+  id: string;
+  label: string;
+  sortOrder: number;
+}
+
+export interface Color {
+  id: string;
+  name: string;
+  hex: string;
+  sortOrder: number;
+}
+
 export interface ProductVariant {
   id: string;
   sku?: string | null;
@@ -24,6 +37,14 @@ export interface ProductVariant {
   priceOverrideUsd?: string | null;
   stock: number;
   isActive: boolean;
+}
+
+export interface ProductImage {
+  id: string;
+  url: string;
+  altEs?: string | null;
+  altEn?: string | null;
+  sortOrder: number;
 }
 
 export interface Product {
@@ -37,6 +58,7 @@ export interface Product {
   isPublished: boolean;
   categoryId?: string | null;
   variants?: ProductVariant[];
+  images?: ProductImage[];
 }
 
 export interface Banner {

@@ -17,6 +17,12 @@ export class VariantDto {
   @IsNumber() stock!: number;
 }
 
+export class ImageDto {
+  @IsString() url!: string;
+  @IsOptional() @IsString() altEs?: string;
+  @IsOptional() @IsString() altEn?: string;
+}
+
 export class CreateProductDto {
   @IsString() slug!: string;
   @IsString() nameEs!: string;
@@ -32,6 +38,12 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => VariantDto)
   variants?: VariantDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
+  images?: ImageDto[];
 }
 
 export class UpdateProductDto extends CreateProductDto {}

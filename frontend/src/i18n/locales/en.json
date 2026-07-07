@@ -6,11 +6,41 @@
     "logout": "Sign out",
     "admin": "Admin"
   },
+  "announcement": "Shipping across El Salvador · Pay on delivery or online",
+  "home": {
+    "shopNow": "Shop now",
+    "categories": "Categories",
+    "featured": "Featured",
+    "viewAll": "View all",
+    "ctaTitle": "Find your style",
+    "ctaText": "New pieces every season, curated with care.",
+    "emptyFeatured": "Products coming soon."
+  },
+  "benefits": {
+    "shippingTitle": "Fast shipping",
+    "shippingText": "Nationwide in 24-72h",
+    "secureTitle": "Secure payment",
+    "secureText": "Your data always protected",
+    "returnsTitle": "Easy returns",
+    "returnsText": "Up to 15 days to exchange"
+  },
+  "shop": {
+    "all": "All",
+    "empty": "No products in this category."
+  },
   "cart": {
     "title": "Your cart",
     "empty": "Your cart is empty",
     "subtotal": "Subtotal",
     "checkout": "Checkout"
+  },
+  "thankyou": {
+    "title": "Thank you for your purchase!",
+    "emailNotice": "We sent an email to {{email}} with all your order details.",
+    "delivery": "Estimated delivery time",
+    "summary": "Order summary",
+    "ref": "Reference",
+    "back": "Continue shopping"
   },
   "checkout": {
     "title": "Checkout (simulated)",
@@ -22,6 +52,15 @@
     "processing": "Processing...",
     "approved": "Payment approved! Reference:",
     "declined": "Payment declined. Try another card."
+  },
+  "footer": {
+    "tagline": "Salvadoran clothing and accessories, with its own style.",
+    "shopCol": "Shop",
+    "helpCol": "Help",
+    "contact": "Contact",
+    "shipping": "Shipping",
+    "returns": "Returns and exchanges",
+    "rights": "All rights reserved"
   },
   "admin": {
     "dashboard": "Dashboard",

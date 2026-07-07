@@ -43,21 +43,21 @@ class CategoriesController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN, Role.CATALOG)
   @Post()
   create(@Body() body: any) {
     return this.service.create(body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN, Role.CATALOG)
   @Put(":id")
   update(@Param("id") id: string, @Body() body: any) {
     return this.service.update(id, body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN, Role.CATALOG)
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.service.remove(id);

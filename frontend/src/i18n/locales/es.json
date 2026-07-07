@@ -6,11 +6,41 @@
     "logout": "Salir",
     "admin": "Administración"
   },
+  "announcement": "Envío a todo El Salvador · Paga contra entrega o en línea",
+  "home": {
+    "shopNow": "Ver tienda",
+    "categories": "Categorías",
+    "featured": "Destacados",
+    "viewAll": "Ver todo",
+    "ctaTitle": "Encuentra tu estilo",
+    "ctaText": "Nuevas piezas cada temporada, seleccionadas con cariño.",
+    "emptyFeatured": "Pronto tendremos productos disponibles."
+  },
+  "benefits": {
+    "shippingTitle": "Envío rápido",
+    "shippingText": "A todo el país en 24-72h",
+    "secureTitle": "Pago seguro",
+    "secureText": "Tus datos siempre protegidos",
+    "returnsTitle": "Cambios fáciles",
+    "returnsText": "Hasta 15 días para cambios"
+  },
+  "shop": {
+    "all": "Todo",
+    "empty": "No hay productos en esta categoría."
+  },
   "cart": {
     "title": "Tu carrito",
     "empty": "Tu carrito está vacío",
     "subtotal": "Subtotal",
     "checkout": "Pagar"
+  },
+  "thankyou": {
+    "title": "¡Gracias por tu compra!",
+    "emailNotice": "Te enviamos un correo a {{email}} con todos los datos de tu compra.",
+    "delivery": "Tiempo estimado de entrega",
+    "summary": "Resumen de tu pedido",
+    "ref": "Referencia",
+    "back": "Seguir comprando"
   },
   "checkout": {
     "title": "Pago (simulado)",
@@ -22,6 +52,15 @@
     "processing": "Procesando...",
     "approved": "¡Pago aprobado! Referencia:",
     "declined": "Pago rechazado. Intenta con otra tarjeta."
+  },
+  "footer": {
+    "tagline": "Ropa y accesorios salvadoreños, con estilo propio.",
+    "shopCol": "Tienda",
+    "helpCol": "Ayuda",
+    "contact": "Contacto",
+    "shipping": "Envíos",
+    "returns": "Cambios y devoluciones",
+    "rights": "Todos los derechos reservados"
   },
   "admin": {
     "dashboard": "Panel",

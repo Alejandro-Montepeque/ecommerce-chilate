@@ -28,6 +28,29 @@ class EnvironmentVariables {
   @IsOptional()
   @IsInt()
   PORT?: number;
+
+  // Google Cloud Storage (opcional; si falta, se usa base64 como respaldo).
+  @IsOptional()
+  @IsString()
+  GCS_BUCKET?: string;
+
+  @IsOptional()
+  @IsString()
+  GCS_PROJECT_ID?: string;
+
+  // URL pública del backend (para construir las URLs de imágenes vía proxy).
+  @IsOptional()
+  @IsString()
+  PUBLIC_API_URL?: string;
+
+  // Gmail SMTP para envío de correos (opcional; si falta, se omite el envío).
+  @IsOptional()
+  @IsString()
+  GMAIL_USER?: string;
+
+  @IsOptional()
+  @IsString()
+  GMAIL_APP_PASSWORD?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

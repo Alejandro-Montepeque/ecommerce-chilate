@@ -29,9 +29,9 @@ export class OrdersController {
     return this.orders.findMine(user.userId);
   }
 
-  // Staff: todas las órdenes.
+  // Solo ADMIN puede ver todas las órdenes.
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Roles(Role.ADMIN)
   @Get()
   findAll() {
     return this.orders.findAll();

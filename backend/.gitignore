@@ -3,3 +3,8 @@ dist
 .env
 .env.local
 *.log
+
+# Credenciales de Google Cloud (¡nunca subir!)
+ecommercechilate-*.json
+gcp-credentials.json
+*-credentials.json

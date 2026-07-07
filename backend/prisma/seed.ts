@@ -42,9 +42,80 @@ async function main() {
 
   // Contenido de la landing
   const content = [
-    { key: "hero_title", valueEs: "Estilo que te representa", valueEn: "Style that speaks for you" },
-    { key: "hero_subtitle", valueEs: "Ropa y accesorios seleccionados con cariño", valueEn: "Clothing and accessories, curated with care" },
-    { key: "footer_about", valueEs: "Chilate — moda salvadoreña.", valueEn: "Chilate — Salvadoran fashion." },
+    {
+      key: "hero_title",
+      valueEs: "Estilo que te representa",
+      valueEn: "Style that speaks for you",
+    },
+    {
+      key: "hero_subtitle",
+      valueEs: "Ropa y accesorios seleccionados con cariño",
+      valueEn: "Clothing and accessories, curated with care",
+    },
+    {
+      key: "footer_tagline",
+      valueEs: "Ropa y accesorios salvadoreños, con estilo propio.",
+      valueEn: "Salvadoran clothing and accessories, with its own style.",
+    },
+    { key: "footer_shop_title", valueEs: "Tienda", valueEn: "Shop" },
+    { key: "footer_help_title", valueEs: "Ayuda", valueEn: "Help" },
+    { key: "footer_help_shipping", valueEs: "Envíos", valueEn: "Shipping" },
+    {
+      key: "footer_help_returns",
+      valueEs: "Cambios y devoluciones",
+      valueEn: "Returns and exchanges",
+    },
+    { key: "footer_help_contact", valueEs: "Contacto", valueEn: "Contact" },
+    { key: "footer_contact_title", valueEs: "Contacto", valueEn: "Contact" },
+    {
+      key: "footer_email",
+      valueEs: "hola@chilate.com",
+      valueEn: "hola@chilate.com",
+    },
+    { key: "footer_phone", valueEs: "", valueEn: "" },
+    {
+      key: "footer_location",
+      valueEs: "San Salvador, SV",
+      valueEn: "San Salvador, SV",
+    },
+    {
+      key: "footer_rights",
+      valueEs: "Todos los derechos reservados",
+      valueEn: "All rights reserved",
+    },
+    // Textos de correos (se editan en el panel; el envío usa el español).
+    {
+      key: "email_welcome_subject",
+      valueEs: "¡Bienvenido a Chilate!",
+      valueEn: "",
+    },
+    {
+      key: "email_welcome_body",
+      valueEs:
+        "Gracias por crear tu cuenta en Chilate. Nos alegra tenerte aquí. Explora nuestra tienda y encuentra tu estilo.",
+      valueEn: "",
+    },
+    {
+      key: "email_order_subject",
+      valueEs: "Gracias por tu compra en Chilate",
+      valueEn: "",
+    },
+    {
+      key: "email_order_intro",
+      valueEs: "¡Gracias por tu compra! Estos son los detalles de tu pedido:",
+      valueEn: "",
+    },
+    {
+      key: "email_order_outro",
+      valueEs:
+        "Te avisaremos cuando tu pedido esté en camino. ¡Gracias por elegir Chilate!",
+      valueEn: "",
+    },
+    {
+      key: "email_delivery_estimate",
+      valueEs: "3 a 5 días hábiles",
+      valueEn: "",
+    },
   ];
   for (const c of content) {
     await prisma.siteContent.upsert({
@@ -54,33 +125,57 @@ async function main() {
     });
   }
 
-  // Producto de ejemplo con variantes talla/color
-  const product = await prisma.product.upsert({
+  // Producto de ejemplo con variantes talla/color.
+  // Solo se crea si NO existe: así el seed es idempotente y no choca con
+  // cambios hechos desde el panel (que recrean las variantes sin sku).
+  const existing = await prisma.product.findUnique({
     where: { slug: "camiseta-basica" },
-    update: {},
-    create: {
-      slug: "camiseta-basica",
-      nameEs: "Camiseta Básica",
-      nameEn: "Basic Tee",
-      descriptionEs: "Algodón 100%, corte regular.",
-      descriptionEn: "100% cotton, regular fit.",
-      priceUsd: 18.0,
-      isPublished: true,
-      categoryId: mujer.id,
-    },
   });
 
-  const variants = [
-    { sku: "TEE-BLK-S", size: "S", color: "Negro", colorHex: "#111111", stock: 10 },
-    { sku: "TEE-BLK-M", size: "M", color: "Negro", colorHex: "#111111", stock: 15 },
-    { sku: "TEE-WHT-M", size: "M", color: "Blanco", colorHex: "#FFFFFF", stock: 8 },
-    { sku: "TEE-WHT-L", size: "L", color: "Blanco", colorHex: "#FFFFFF", stock: 5 },
-  ];
-  for (const v of variants) {
-    await prisma.productVariant.upsert({
-      where: { sku: v.sku },
-      update: {},
-      create: { ...v, productId: product.id },
+  if (!existing) {
+    await prisma.product.create({
+      data: {
+        slug: "camiseta-basica",
+        nameEs: "Camiseta Básica",
+        nameEn: "Basic Tee",
+        descriptionEs: "Algodón 100%, corte regular.",
+        descriptionEn: "100% cotton, regular fit.",
+        priceUsd: 18.0,
+        isPublished: true,
+        categoryId: mujer.id,
+        variants: {
+          create: [
+            {
+              sku: "TEE-BLK-S",
+              size: "S",
+              color: "Negro",
+              colorHex: "#111111",
+              stock: 10,
+            },
+            {
+              sku: "TEE-BLK-M",
+              size: "M",
+              color: "Negro",
+              colorHex: "#111111",
+              stock: 15,
+            },
+            {
+              sku: "TEE-WHT-M",
+              size: "M",
+              color: "Blanco",
+              colorHex: "#FFFFFF",
+              stock: 8,
+            },
+            {
+              sku: "TEE-WHT-L",
+              size: "L",
+              color: "Blanco",
+              colorHex: "#FFFFFF",
+              stock: 5,
+            },
+          ],
+        },
+      },
     });
   }
 

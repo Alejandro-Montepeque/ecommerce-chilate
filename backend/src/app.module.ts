@@ -7,10 +7,14 @@ import { UsersModule } from "./users/users.module";
 import { ProductsModule } from "./products/products.module";
 import { CategoriesModule } from "./categories/categories.module";
 import { CollectionsModule } from "./collections/collections.module";
+import { SizesModule } from "./sizes/sizes.module";
+import { ColorsModule } from "./colors/colors.module";
 import { BannersModule } from "./banners/banners.module";
 import { ContentModule } from "./content/content.module";
 import { OrdersModule } from "./orders/orders.module";
 import { PaymentsModule } from "./payments/payments.module";
+import { UploadsModule } from "./uploads/uploads.module";
+import { MailModule } from "./mail/mail.module";
 import { HealthController } from "./health.controller";
 
 @Module({
@@ -22,10 +26,14 @@ import { HealthController } from "./health.controller";
     ProductsModule,
     CategoriesModule,
     CollectionsModule,
+    SizesModule,
+    ColorsModule,
     BannersModule,
     ContentModule,
     OrdersModule,
     PaymentsModule,
+    UploadsModule,
+    MailModule,
   ],
   controllers: [HealthController],
 })

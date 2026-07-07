@@ -5,7 +5,9 @@ import {
   useDeleteBanner,
 } from "@/features/banners/banners.queries";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/Spinner";
+import { alerts } from "@/lib/alerts";
 
 export default function BannersAdminPage() {
   const { data: banners = [], isLoading } = useAdminBanners();
@@ -23,44 +25,76 @@ export default function BannersAdminPage() {
         titleEn: draft.titleEn || draft.titleEs,
         isActive: true,
       },
-      { onSuccess: () => setDraft({ titleEs: "", titleEn: "" }) },
+      {
+        onSuccess: () => {
+          setDraft({ titleEs: "", titleEn: "" });
+          alerts.success("Banner agregado");
+        },
+      },
     );
+  }
+
+  async function handleDelete(id: string) {
+    const ok = await alerts.confirm("¿Eliminar este banner?");
+    if (ok)
+      deleteBanner.mutate(id, {
+        onSuccess: () => alerts.success("Banner eliminado"),
+      });
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Banners</h1>
+      <h1 className="mb-6 text-2xl font-semibold tracking-tight text-zinc-900">
+        Banners
+      </h1>
 
-      <div className="flex gap-2 mb-6">
-        <input
-          placeholder="Título ES"
-          value={draft.titleEs}
-          onChange={(e) => setDraft({ ...draft, titleEs: e.target.value })}
-          className="border rounded px-3 py-2 flex-1"
-        />
-        <input
-          placeholder="Title EN"
-          value={draft.titleEn}
-          onChange={(e) => setDraft({ ...draft, titleEn: e.target.value })}
-          className="border rounded px-3 py-2 flex-1"
-        />
-        <Button onClick={create} disabled={createBanner.isPending}>
-          Agregar
-        </Button>
+      <div className="mb-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-card">
+        <p className="mb-3 text-sm font-medium text-zinc-500">Nuevo banner</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <Input
+            label="Título (ES)"
+            value={draft.titleEs}
+            onChange={(e) => setDraft({ ...draft, titleEs: e.target.value })}
+          />
+          <Input
+            label="Title (EN)"
+            value={draft.titleEn}
+            onChange={(e) => setDraft({ ...draft, titleEn: e.target.value })}
+          />
+          <Button onClick={create} disabled={createBanner.isPending}>
+            Agregar
+          </Button>
+        </div>
       </div>
 
-      <ul className="divide-y">
-        {banners.map((b) => (
-          <li key={b.id} className="py-3 flex justify-between items-center">
-            <span>
-              {b.titleEs} <span className="text-gray-400">/ {b.titleEn}</span>
-            </span>
-            <Button variant="danger" onClick={() => deleteBanner.mutate(b.id)}>
-              Eliminar
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-card">
+        {banners.length === 0 ? (
+          <p className="p-6 text-center text-sm text-zinc-500">
+            Aún no hay banners
+          </p>
+        ) : (
+          <ul className="divide-y divide-zinc-100">
+            {banners.map((b) => (
+              <li
+                key={b.id}
+                className="flex items-center justify-between px-5 py-3"
+              >
+                <span className="text-zinc-800">
+                  {b.titleEs}{" "}
+                  <span className="text-zinc-400">/ {b.titleEn}</span>
+                </span>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => handleDelete(b.id)}
+                >
+                  Eliminar
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ export interface CartItem {
   color: string | null;
   unitPrice: number;
   quantity: number;
+  image?: string | null;
 }
 
 interface CartState {

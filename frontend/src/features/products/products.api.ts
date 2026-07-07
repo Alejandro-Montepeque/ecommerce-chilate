@@ -1,5 +1,18 @@
 import { api } from "@/lib/api";
-import type { Product } from "@/types";
+import type { Category, Product } from "@/types";
+
+export interface VariantInput {
+  size?: string;
+  color?: string;
+  colorHex?: string;
+  stock: number;
+}
+
+export interface ImageInput {
+  url: string;
+  altEs?: string;
+  altEn?: string;
+}
 
 export interface ProductInput {
   slug: string;
@@ -10,6 +23,8 @@ export interface ProductInput {
   priceUsd: number;
   isPublished?: boolean;
   categoryId?: string;
+  variants?: VariantInput[];
+  images?: ImageInput[];
 }
 
 export const productsApi = {
@@ -20,4 +35,8 @@ export const productsApi = {
   update: (id: string, data: ProductInput) =>
     api.put<Product>(`/products/${id}`, data),
   remove: (id: string) => api.del<void>(`/products/${id}`),
+};
+
+export const categoriesApi = {
+  list: () => api.get<Category[]>("/categories"),
 };

@@ -36,6 +36,14 @@ services:
       JWT_EXPIRES_IN: 7d
       CORS_ORIGINS: http://localhost:5173
       PORT: 8080
+      # Google Cloud Storage para imágenes (bucket privado, servido por proxy)
+      GCS_BUCKET: ecommerce-chilate
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp.json
+      PUBLIC_API_URL: http://localhost:8080/api
+      # Correos (Gmail SMTP). Define GMAIL_USER y GMAIL_APP_PASSWORD en un
+      # archivo .env en la raíz (NO se sube a git). Si faltan, se omite el envío.
+      GMAIL_USER: ${GMAIL_USER:-}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-}
     ports:
       - "8080:8080"
     depends_on:
@@ -44,6 +52,8 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      # Credenciales de la service account (montadas de solo lectura)
+      - ./backend/ecommercechilate-73d70610d476.json:/secrets/gcp.json:ro
 
   web:
     build:

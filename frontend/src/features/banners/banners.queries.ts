@@ -14,10 +14,11 @@ export function useActiveBanners() {
   });
 }
 
-export function useAdminBanners() {
+export function useAdminBanners(enabled = true) {
   return useQuery({
     queryKey: bannerKeys.admin(),
     queryFn: bannersApi.listAll,
+    enabled,
   });
 }
 

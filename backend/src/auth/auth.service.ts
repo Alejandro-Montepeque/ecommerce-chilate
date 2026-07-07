@@ -6,6 +6,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
+import { MailService } from "../mail/mail.service";
 import { LoginDto, RegisterDto } from "./dto/auth.dto";
 
 @Injectable()
@@ -13,6 +14,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private mail: MailService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -27,6 +29,8 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: { email: dto.email, password: hash, fullName: dto.fullName },
     });
+    // Correo de bienvenida (no bloquea el registro si falla).
+    void this.mail.sendWelcome(user.email).catch(() => undefined);
     return this.sign(user.id, user.email, user.role);
   }
 

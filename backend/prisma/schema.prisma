@@ -13,6 +13,7 @@ datasource db {
 enum Role {
   CUSTOMER
   MAINTENANCE
+  CATALOG
   ADMIN
 }
 
@@ -41,6 +42,23 @@ model Category {
   sortOrder Int       @default(0)
   products  Product[]
   createdAt DateTime  @default(now())
+}
+
+// Catálogo de tallas gestionable desde el panel.
+model Size {
+  id        String   @id @default(uuid())
+  label     String   @unique // S, M, L, 38...
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// Catálogo de colores gestionable desde el panel.
+model Color {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  hex       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
 }
 
 model Collection {

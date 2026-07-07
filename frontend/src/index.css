@@ -2,6 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: system-ui, -apple-system, sans-serif;
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-zinc-50 text-zinc-800;
+  }
+}
+
+/* Iconos de SweetAlert2 alineados a la paleta del ecommerce */
+.swal2-icon.swal2-success {
+  border-color: #a7f3d0;
+  color: #10b981;
+}
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.swal2-icon.swal2-success [class^="swal2-success-line"] {
+  background-color: #10b981;
+}
+.swal2-icon.swal2-error {
+  border-color: #fecaca;
+  color: #ef4444;
+}
+.swal2-icon.swal2-error .swal2-x-mark-line-left,
+.swal2-icon.swal2-error .swal2-x-mark-line-right {
+  background-color: #ef4444;
+}
+.swal2-icon.swal2-warning {
+  border-color: #fde68a;
+  color: #f59e0b;
+}
+.swal2-icon.swal2-info,
+.swal2-icon.swal2-question {
+  border-color: #c7d2fe;
+  color: #4f46e5;
+}
+.swal2-timer-progress-bar {
+  background: #4f46e5;
 }
