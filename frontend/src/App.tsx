@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { StoreLayout } from "@/components/layout/StoreLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { RequireStaff } from "@/routes/RequireStaff";
@@ -20,8 +21,18 @@ import BannersAdminPage from "@/pages/admin/BannersAdminPage";
 import ContentAdminPage from "@/pages/admin/ContentAdminPage";
 import UsersAdminPage from "@/pages/admin/UsersAdminPage";
 import AuditAdminPage from "@/pages/admin/AuditAdminPage";
+import ChangePasswordPage from "@/pages/store/ChangePasswordPage";
 
 export default function App() {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  // Cambio de contraseña obligatorio: mientras el usuario tenga una temporal,
+  // se le fuerza a /cambiar-contrasena antes de usar el resto del sitio.
+  if (user?.mustChangePassword && location.pathname !== "/cambiar-contrasena") {
+    return <Navigate to="/cambiar-contrasena" replace />;
+  }
+
   return (
     <Routes>
       <Route element={<StoreLayout />}>
@@ -32,6 +43,7 @@ export default function App() {
         <Route path="/pedido-confirmado" element={<ThankYouPage />} />
         <Route path="/favoritos" element={<WishlistPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/cambiar-contrasena" element={<ChangePasswordPage />} />
       </Route>
 
       <Route

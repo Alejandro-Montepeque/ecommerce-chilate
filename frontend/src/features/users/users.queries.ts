@@ -24,3 +24,9 @@ export function useSetUserRole() {
     onSuccess: () => qc.invalidateQueries({ queryKey: usersKey }),
   });
 }
+
+export function useResetUserPassword() {
+  return useMutation({
+    mutationFn: (id: string) => usersApi.resetPassword(id),
+  });
+}

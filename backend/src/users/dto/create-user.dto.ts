@@ -1,25 +1,16 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsOptional,
-  IsString,
-  MinLength,
-} from "class-validator";
+import { IsEmail, IsEnum, IsOptional, IsString } from "class-validator";
 import { Role } from "@prisma/client";
 
 export class CreateUserDto {
   @IsEmail()
   email!: string;
 
-  @IsString()
-  @MinLength(8, { message: "La contraseña debe tener al menos 8 caracteres" })
-  password!: string;
-
   @IsOptional()
   @IsString()
   fullName?: string;
 
-  // Solo roles internos; el ADMIN los asigna.
+  // Solo roles internos; el ADMIN los asigna. La contraseña NO se envía: el
+  // sistema genera una temporal y la manda por correo.
   @IsEnum(Role)
   role!: Role;
 }

@@ -43,6 +43,12 @@ class EnvironmentVariables {
   @IsString()
   PUBLIC_API_URL?: string;
 
+  // URL del frontend (para el enlace de inicio de sesión en los correos de alta).
+  // Si falta, se usa el primer origen de CORS_ORIGINS.
+  @IsOptional()
+  @IsString()
+  APP_URL?: string;
+
   // Gmail SMTP para envío de correos (opcional; si falta, se omite el envío).
   @IsOptional()
   @IsString()

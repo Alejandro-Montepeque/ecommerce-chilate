@@ -39,11 +39,18 @@ enum AuditAction {
 }
 
 model User {
-  id        String         @id @default(uuid())
-  email     String         @unique
-  password  String // hash bcrypt
-  fullName  String?
-  role      Role           @default(CUSTOMER)
+  id       String  @id @default(uuid())
+  email    String  @unique
+  password String // hash bcrypt
+  fullName String?
+  role     Role    @default(CUSTOMER)
+
+  // Alta de usuarios internos: se crean con una contraseña TEMPORAL que la
+  // persona debe cambiar en su primer inicio de sesión. La temporal vence en
+  // tempPasswordExpiresAt (24h); pasada esa fecha el login se bloquea.
+  mustChangePassword    Boolean   @default(false)
+  tempPasswordExpiresAt DateTime?
+
   orders    Order[]
   wishlist  WishlistItem[]
   auditLogs AuditLog[]

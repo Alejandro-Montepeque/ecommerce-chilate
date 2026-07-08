@@ -36,6 +36,17 @@ export async function seedEmails(prisma: PrismaClient) {
       valueEs: "3 a 5 días hábiles",
       valueEn: "",
     },
+    {
+      key: "email_invite_subject",
+      valueEs: "Tu acceso al panel de Chilate",
+      valueEn: "",
+    },
+    {
+      key: "email_invite_intro",
+      valueEs:
+        "Se creó una cuenta para ti en el panel de Chilate. Ingresa con la contraseña temporal de abajo; por seguridad, el sistema te pedirá cambiarla en tu primer inicio de sesión.",
+      valueEn: "",
+    },
   ];
   for (const c of content) {
     await prisma.siteContent.upsert({

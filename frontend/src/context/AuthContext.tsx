@@ -15,6 +15,10 @@ interface AuthState {
   isStaff: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName?: string) => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<void>;
   signOut: () => void;
 }
 
@@ -48,6 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(res.user);
   }
 
+  async function changePassword(currentPassword: string, newPassword: string) {
+    const res = await authApi.changePassword(currentPassword, newPassword);
+    tokenStore.set(res.accessToken);
+    setUser(res.user);
+  }
+
   function signOut() {
     tokenStore.clear();
     setUser(null);
@@ -60,7 +70,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isStaff, signIn, signUp, signOut }}
+      value={{
+        user,
+        loading,
+        isStaff,
+        signIn,
+        signUp,
+        changePassword,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

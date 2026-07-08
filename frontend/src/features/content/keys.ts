@@ -159,4 +159,20 @@ export const CONTENT_KEYS: ContentKey[] = [
     singleLang: true,
     defaultEs: "3 a 5 días hábiles",
   },
+  {
+    key: "email_invite_subject",
+    label: "Alta de usuario · asunto",
+    group: "email",
+    singleLang: true,
+    defaultEs: "Tu acceso al panel de Chilate",
+  },
+  {
+    key: "email_invite_intro",
+    label: "Alta de usuario · texto de introducción",
+    group: "email",
+    multiline: true,
+    singleLang: true,
+    defaultEs:
+      "Se creó una cuenta para ti en el panel de Chilate. Ingresa con la contraseña temporal de abajo; por seguridad, el sistema te pedirá cambiarla en tu primer inicio de sesión.",
+  },
 ];

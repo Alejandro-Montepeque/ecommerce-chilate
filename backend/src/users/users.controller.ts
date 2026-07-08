@@ -34,4 +34,10 @@ export class UsersController {
   setRole(@Param("id") id: string, @Body("role") role: Role) {
     return this.users.setRole(id, role);
   }
+
+  // Reenvía/restablece la contraseña temporal de un usuario interno.
+  @Post(":id/reset-password")
+  resetPassword(@Param("id") id: string) {
+    return this.users.resetPassword(id);
+  }
 }

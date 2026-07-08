@@ -13,4 +13,9 @@ export const authApi = {
   register: (email: string, password: string, fullName?: string) =>
     api.post<AuthResponse>("/auth/register", { email, password, fullName }),
   me: () => api.get<User>("/auth/me"),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<AuthResponse>("/auth/change-password", {
+      currentPassword,
+      newPassword,
+    }),
 };
