@@ -1,212 +1,284 @@
 # Chilate — Ecommerce de ropa y accesorios
 
-Monorepo de una tienda autogestionable, bilingüe (ES/EN) y en USD, con panel de
-administración, manejo de roles y pasarela de pagos simulada.
+**Chilate** es una tienda en línea de ropa y accesorios, **autogestionable** (el
+administrador edita banners, textos, logo, catálogos y precios sin tocar código),
+**bilingüe** (español / inglés), con precios en **USD**, panel de administración,
+manejo de **roles**, **lista de deseos**, **descuentos programados** con banner de
+cuenta regresiva, envío de **correos** y una **pasarela de pago simulada**.
 
-## Stack
+Es un **monorepo** con dos aplicaciones independientes (`frontend/` y `backend/`)
+que se despliegan por separado.
+
+> Para el paso a paso de despliegue y todas las variables de entorno, ver
+> [`DEPLOYMENT.md`](./DEPLOYMENT.md). Cada app tiene además su propio README con
+> el detalle técnico: [`backend/README.md`](./backend/README.md) y
+> [`frontend/README.md`](./frontend/README.md).
+
+---
+
+## Índice
+
+- [Funcionalidades](#funcionalidades)
+- [Stack y arquitectura](#stack-y-arquitectura)
+- [Roles y permisos](#roles-y-permisos)
+- [Estructura del monorepo](#estructura-del-monorepo)
+- [Desarrollo local](#desarrollo-local)
+- [Despliegue](#despliegue)
+- [Diseño e idioma](#diseño-e-idioma)
+- [Seguridad](#seguridad-y-buenas-prácticas)
+
+---
+
+## Funcionalidades
+
+**Tienda (público / clientes)**
+
+- Catálogo con **variantes por talla y color** (cada combinación tiene su propio
+  stock y precio opcional), selección de color con muestras y de talla con botones.
+- Navegación jerárquica **Categoría › Subcategoría**: las categorías (Camisas,
+  Pantalones, Zapatos, Accesorios…) son un catálogo editable; la subcategoría es
+  fija (**Hombre / Mujer / Unisex**). La tienda filtra por ambas.
+- **Descuentos programados**: precio rebajado automático dentro del rango de fechas
+  y un **banner de cuenta regresiva** que anuncia el próximo descuento y avisa
+  cuando ya está activo (solo aparece si hay un descuento real).
+- **Lista de deseos** (wishlist): el corazón es visible para todos; si un invitado
+  intenta guardar, se le invita a iniciar sesión.
+- **Carrito** persistente (Zustand) y **checkout** con pasarela simulada, con
+  **máscaras** de teléfono, número de tarjeta, MM/AA y CVC.
+- Al comprar, pantalla de **agradecimiento** con tiempo estimado de entrega y aviso
+  de correo enviado.
+- **Bilingüe ES/EN** y precios en **USD**.
+
+**Panel de administración (`/admin`)**
+
+- **Productos**: alta/edición con matriz de variantes talla×color, stock, precio,
+  imagen, categoría y subcategoría; publicar/despublicar.
+- **Catálogos**: gestión de **categorías, colores y tallas** desde la interfaz.
+- **Descuentos**: programación por producto con fecha de inicio/fin (solo a partir
+  del día siguiente).
+- **Banners** y **Contenido**: textos de la landing, footer, **logo** y **textos de
+  los correos**, todo editable y bilingüe.
+- **Usuarios**: creación de usuarios internos y cambio de rol (solo ADMIN).
+
+**Transversales**
+
+- **Autogestión total** del contenido visible de la tienda.
+- **Correos** por Gmail SMTP: bienvenida al registrarse y confirmación de compra con
+  el detalle del pedido (los textos son editables desde el panel).
+- **Imágenes** en Google Cloud Storage (bucket **privado**, servidas por un proxy
+  del backend), con respaldo a base64 si GCS no está configurado.
+
+---
+
+## Stack y arquitectura
 
 | Capa | Tecnología | Despliegue |
 |------|------------|------------|
-| Frontend | React + TypeScript + Vite + Tailwind + TanStack Query | Vercel |
-| Backend | NestJS + TypeScript + Prisma | Google Cloud Run (Docker) |
-| Base de datos | PostgreSQL | Neon (serverless, tier gratis) |
-| Auth | JWT propio (bcrypt + Passport) | — |
+| Frontend | React 18 + TypeScript + Vite + Tailwind CSS + TanStack Query + Zustand | **Vercel** |
+| Backend | NestJS 10 + TypeScript + Prisma | **Google Cloud Run** (Docker) |
+| Base de datos | PostgreSQL | **Neon** (serverless) |
+| Autenticación | JWT propio (bcrypt + Passport) | — |
+| Imágenes | Google Cloud Storage (bucket privado + proxy) | GCP |
+| Correos | Nodemailer + Gmail SMTP | — |
 
-Sin CDNs: todas las dependencias (incluido Tailwind) se instalan por npm y se
-compilan en el build. Tipografía del sistema, sin fuentes externas.
+```
+Navegador
+   │  (HTTPS)
+   ▼
+Vercel  ──── React SPA ────►  Cloud Run (NestJS /api)  ──►  Neon (PostgreSQL)
+                                     │
+                                     ├──►  Google Cloud Storage (imágenes, privado)
+                                     └──►  Gmail SMTP (correos)
+```
 
-### Prácticas aplicadas
-- **Limpio y consistente:** ESLint + Prettier configurados en ambos proyectos
-  (`npm run lint`, `npm run format`).
-- **Reutilizable:** capa de servicios por *feature* en el front (`features/*/*.api.ts`),
-  hooks de datos con TanStack Query, y componentes UI compartidos (`components/ui`).
-  En el back, módulos NestJS independientes con guards y decoradores reutilizables.
-- **Escalable:** cache y estados de servidor con TanStack Query; backend modular
-  con Prisma; config de entorno **validada al arranque** (la app no inicia si falta
-  una variable); Cloud Run escala a cero y hacia arriba sin cambios de código.
+**Sin CDNs de código:** todas las dependencias (incluidas Tailwind y la tipografía
+Nunito, vía `@fontsource`) se instalan por npm y se compilan en el build.
+
+---
+
+## Roles y permisos
+
+Un solo sistema de auth (JWT). Los permisos se aplican en el **backend** con guards
+(`JwtAuthGuard` + `RolesGuard`), y el frontend los refleja para mostrar/ocultar
+secciones. Definición espejo en `frontend/src/features/auth/permissions.ts`.
+
+| Rol | Puede |
+|-----|-------|
+| **Invitado** | Navegar y comprar sin cuenta. |
+| **CUSTOMER** | Todo lo anterior + wishlist y sus propias órdenes. Es el rol por defecto al registrarse. |
+| **CATALOG** | Panel: productos, catálogos (categorías/colores/tallas) y descuentos. |
+| **MAINTENANCE** | Panel: banners y contenido (landing, footer, logo, textos de correo). |
+| **ADMIN** | Todo, incluido usuarios y órdenes. |
+
+Reglas de negocio importantes:
+
+- El **registro público** solo crea `CUSTOMER`. Los usuarios internos
+  (ADMIN/MAINTENANCE/CATALOG) **solo los crea un ADMIN**.
+- Un ADMIN **no puede quitarle el rol de administrador a otro ADMIN**.
+- MAINTENANCE **no** tiene acceso a la sección de usuarios.
+
+---
 
 ## Estructura del monorepo
 
 ```
 ecommerce-chilate/
-├── docker-compose.yml        desarrollo local (db + api + web)
-├── backend/                  API NestJS (se despliega en Cloud Run)
+├── docker-compose.yml         desarrollo local (db + api + web)
+├── DEPLOYMENT.md              guía de despliegue paso a paso
+├── README.md                  este archivo
+│
+├── backend/                   API NestJS  →  Cloud Run   (ver backend/README.md)
 │   ├── src/
-│   │   ├── main.ts           bootstrap, CORS, prefijo /api, validación
+│   │   ├── main.ts            bootstrap: CORS, prefijo /api, validación, body limit
 │   │   ├── app.module.ts
-│   │   ├── config/           validación de variables de entorno
-│   │   ├── prisma/           PrismaService + módulo global
-│   │   ├── common/           guards (JWT, roles), decoradores
-│   │   ├── auth/             registro/login JWT, estrategia, DTOs
-│   │   ├── users/            gestión de usuarios y roles (solo ADMIN)
-│   │   ├── products/         catálogo + variantes (CRUD)
-│   │   ├── categories/
-│   │   ├── collections/
-│   │   ├── banners/          contenido editable de la landing
-│   │   ├── content/          textos bilingües de la landing
-│   │   ├── orders/           checkout, inventario, órdenes
-│   │   └── payments/         pasarela SIMULADA
+│   │   ├── config/            validación de variables de entorno (falla al arranque)
+│   │   ├── prisma/            PrismaService (módulo global)
+│   │   ├── common/            guards (JWT, roles), decoradores (@Roles, @CurrentUser)
+│   │   ├── auth/              registro/login JWT, estrategia, DTOs
+│   │   ├── users/             gestión de usuarios y roles (solo ADMIN)
+│   │   ├── products/          catálogo + variantes + subcategoría (CRUD)
+│   │   ├── categories/        catálogo de categorías (editable)
+│   │   ├── colors/  sizes/    catálogos de colores y tallas (editables)
+│   │   ├── collections/       colecciones
+│   │   ├── discounts/         descuentos programados + banner (público)
+│   │   ├── wishlist/          lista de deseos (por usuario)
+│   │   ├── banners/           banners de la landing
+│   │   ├── content/           textos bilingües (landing, footer, correos)
+│   │   ├── orders/            checkout, inventario, órdenes
+│   │   ├── payments/          pasarela SIMULADA
+│   │   ├── mail/              correos (Gmail SMTP)
+│   │   └── uploads/           subida a GCS + proxy de imágenes
 │   ├── prisma/
-│   │   ├── schema.prisma     modelo de datos
-│   │   └── seed.ts           datos iniciales + usuario admin
-│   ├── Dockerfile            imagen de producción (Cloud Run)
-│   ├── Dockerfile.dev        imagen de desarrollo (docker-compose)
+│   │   ├── schema.prisma      modelo de datos
+│   │   └── seed.ts            datos iniciales + usuario admin
+│   ├── Dockerfile             imagen de producción (Cloud Run)
+│   ├── Dockerfile.dev         imagen de desarrollo (docker-compose)
 │   └── .env.example
 │
-└── frontend/                 App React (se despliega en Vercel)
+└── frontend/                  App React  →  Vercel   (ver frontend/README.md)
     ├── src/
-    │   ├── lib/              api.ts (cliente HTTP + token), queryClient.ts
-    │   ├── context/          AuthContext (sesión + rol)
-    │   ├── features/         por dominio: cada uno con *.api.ts (servicio HTTP)
-    │   │                     y *.queries.ts (hooks TanStack Query)
-    │   │   ├── auth/  products/  banners/  content/  orders/  cart/
-    │   ├── components/ui/    Button, Input, Spinner (reutilizables)
-    │   ├── components/layout/ layouts tienda / admin
-    │   ├── pages/store/      Home, Shop, Cart, Checkout, Login
-    │   ├── pages/admin/      Dashboard, Products, Banners, Content
-    │   ├── routes/           RequireStaff (guard del panel)
-    │   ├── i18n/             config + locales es/en
+    │   ├── lib/               api.ts (axios + token), alerts.ts (SweetAlert2), masks.ts
+    │   ├── context/           AuthContext (sesión + rol)
+    │   ├── features/          por dominio: *.api.ts (servicio HTTP) + *.queries.ts (hooks)
+    │   │                      auth, products, cart, checkout(orders), content,
+    │   │                      banners, catalog, wishlist, discounts
+    │   ├── components/ui/      Button, Input, Select, Badge, Spinner, Logo, icons
+    │   ├── components/layout/  StoreLayout (tienda) y AdminLayout (panel), responsive
+    │   ├── pages/store/        Home, Shop, Cart, Checkout, ThankYou, Wishlist, Login
+    │   ├── pages/admin/        Dashboard, Products(+Form), Catalogs, Discounts,
+    │   │                       Banners, Content, Users
+    │   ├── routes/             RequireStaff, RequireAdmin, RequireRole (guards)
+    │   ├── i18n/               config + locales es/en
     │   └── types/
-    ├── eslint.config.js
+    ├── tailwind.config.js      paleta (rosa palo + salvia) y tema
     ├── vercel.json
     └── .env.example
 ```
-
-## Roles
-
-Tres perfiles, un solo sistema de auth (JWT):
-
-- **Invitado** — navega y compra sin cuenta.
-- **CUSTOMER** — cuenta opcional; ve sus propias órdenes.
-- **MAINTENANCE / ADMIN** — gestiona catálogo, banners y contenido en `/admin`.
-
-Al registrarse todos son `CUSTOMER`; el rol de staff se otorga con el seed o
-por un ADMIN vía `PATCH /api/users/:id/role`. La seguridad se aplica en el
-backend con guards (`JwtAuthGuard` + `RolesGuard`), no solo en el frontend.
 
 ---
 
 ## Desarrollo local
 
-Hay dos formas de levantar el proyecto en tu máquina: con Docker (todo en uno) o
-manualmente. Elige una.
+Dos formas de levantarlo. Elige una.
 
 ### Opción A — Docker Compose (recomendada, todo en un comando)
 
-Requisito: Docker Desktop instalado. Desde la raíz del proyecto:
+Requisito: Docker Desktop. Desde la raíz:
 
 ```bash
 docker compose up --build
 ```
 
-Eso levanta tres contenedores: **Postgres**, el **backend** (crea las tablas,
-siembra datos y arranca en `http://localhost:8080/api`) y el **frontend**
-(`http://localhost:5173`). Para detener: `Ctrl+C`, o `docker compose down`
-(añade `-v` para borrar también los datos de la BD).
+Levanta tres contenedores: **Postgres**, el **backend** (crea tablas con
+`prisma db push`, siembra datos y arranca en `http://localhost:8080/api`) y el
+**frontend** (`http://localhost:5173`).
 
-> Esto es **solo para desarrollo local** y no interfiere con el despliegue: en
-> producción el backend va a Cloud Run con `backend/Dockerfile`, el frontend a
-> Vercel, y la base de datos a Neon. Los archivos `*.dev` y `docker-compose.yml`
-> no se usan en producción.
+- Detener: `Ctrl+C` o `docker compose down`.
+- Si cambiaste dependencias o el esquema: `docker compose up --build -V`
+  (recrea `node_modules`/`dist` internos del contenedor).
+- Correos e imágenes: crea un `.env` en la raíz con `GMAIL_USER`,
+  `GMAIL_APP_PASSWORD` y coloca el JSON de la service account de GCP (opcional; sin
+  ellos, el resto funciona igual).
+
+> Docker Compose es **solo para desarrollo local**. En producción el backend va a
+> Cloud Run, el frontend a Vercel y la base a Neon; los archivos `*.dev` y
+> `docker-compose.yml` no se usan en el despliegue.
 
 ### Opción B — Manual
 
-#### 1. Base de datos (Neon)
-1. Crea un proyecto gratis en [neon.tech](https://neon.tech).
-2. Copia la connection string (usa la *pooled* con `?sslmode=require`).
+**1. Base de datos (Neon).** Crea un proyecto en [neon.tech](https://neon.tech) y
+copia la connection string *pooled* con `?sslmode=require`.
 
-#### 2. Backend
+**2. Backend.**
+
 ```bash
 cd backend
 cp .env.example .env          # pega DATABASE_URL y define JWT_SECRET
 npm install
-npx prisma migrate dev --name init   # crea las tablas
-npm run prisma:seed                  # datos + admin@chilate.com / Admin123!
-npm run start:dev                    # http://localhost:8080/api
+npx prisma db push            # crea las tablas
+npm run prisma:seed           # datos + admin@chilate.com / Admin123!
+npm run start:dev             # http://localhost:8080/api
 ```
 
-#### 3. Frontend
+**3. Frontend.**
+
 ```bash
 cd frontend
-cp .env.example .env.local     # VITE_API_URL=http://localhost:8080/api
+cp .env.example .env.local    # VITE_API_URL=http://localhost:8080/api
 npm install
-npm run dev                    # http://localhost:5173
+npm run dev                   # http://localhost:5173
 ```
 
-Entra con `admin@chilate.com` / `Admin123!` para ver el panel `/admin`.
-Regla de la pasarela simulada: tarjeta que termina en dígito par = aprobada
-(ej. `4242 4242 4242 4242`).
+Entra con **`admin@chilate.com` / `Admin123!`** para ver el panel `/admin`.
+Pasarela simulada: una tarjeta que **termina en dígito par** se aprueba (ej.
+`4242 4242 4242 4242`).
 
 ---
 
-## Despliegue en producción
+## Despliegue
 
-### Backend → Google Cloud Run
-Requisitos: proyecto en GCP y `gcloud` instalado y autenticado.
+Resumen (el detalle completo, con todas las variables y el orden recomendado, está
+en [`DEPLOYMENT.md`](./DEPLOYMENT.md)):
 
-```bash
-cd backend
-
-# 1. Habilitar servicios (una sola vez)
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com
-
-# 2. Construir y desplegar (Cloud Build usa el Dockerfile)
-gcloud run deploy chilate-api \
-  --source . \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars "DATABASE_URL=postgresql://...,JWT_SECRET=...,CORS_ORIGINS=https://TU-APP.vercel.app"
-
-# 3. Aplicar migraciones contra Neon (desde tu máquina, con la misma DATABASE_URL)
-npx prisma migrate deploy
-npm run prisma:seed   # opcional
-```
-
-Cloud Run inyecta `PORT` automáticamente (el server escucha ahí). El servicio
-escala a cero: no pagas cuando nadie lo usa.
-
-> Tip: guarda `DATABASE_URL` y `JWT_SECRET` en Secret Manager y pásalos con
-> `--set-secrets` en lugar de `--set-env-vars` para no exponerlos.
-
-### Frontend → Vercel
-1. Sube el repo a GitHub.
-2. En [vercel.com](https://vercel.com) importa el repo y define
-   **Root Directory = `frontend`** (framework: Vite).
-3. Variable de entorno: `VITE_API_URL = https://chilate-api-xxxxx.run.app/api`
-   (la URL que devolvió Cloud Run).
-4. Deploy. `vercel.json` ya maneja el rewrite de rutas de la SPA.
-5. Actualiza `CORS_ORIGINS` en Cloud Run con el dominio final de Vercel.
+- **Backend → Google Cloud Run**: `gcloud run deploy --source .` desde `backend/`.
+  Variables clave: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS` (dominio de Vercel),
+  `PUBLIC_API_URL` (URL de Cloud Run + `/api`), `GCS_BUCKET`, `GMAIL_USER`,
+  `GMAIL_APP_PASSWORD`, `TZ=America/El_Salvador`. `PORT` la inyecta Cloud Run.
+- **Frontend → Vercel**: Root Directory `frontend`, variable `VITE_API_URL` con la
+  URL de Cloud Run + `/api`.
+- **Base → Neon**: aplica el esquema una vez con `npx prisma db push` y el seed.
 
 ---
 
-## Imágenes (Google Cloud Storage)
+## Diseño e idioma
 
-Las imágenes de producto se suben a un bucket de GCS. Si no se configura, el
-backend responde 503 y el frontend guarda la imagen como base64 (funciona en
-local sin credenciales).
+- **Estética boutique**: paleta **rosa palo** (marca) + **salvia** (acento) sobre
+  neutros cálidos, tipografía **Nunito** (redondeada, instalada por npm).
+  Definida en `frontend/tailwind.config.js` e `index.css`.
+- **Responsive** en móvil, tablet y laptop: header con menú hamburguesa, panel admin
+  con sidebar deslizable, tablas con scroll horizontal.
+- **Alertas y modales** con SweetAlert2 re-tematizado (toasts de notificación,
+  modales de confirmación).
+- **i18n** con `react-i18next`; textos en `frontend/src/i18n/locales/{es,en}.json`.
 
-Para activarlo:
+---
 
-1. Crea un bucket (ej. `ecommerce-chilate`).
-2. Hazlo de lectura pública: en **Permisos**, otorga a `allUsers` el rol
-   `Storage Object Viewer` (requiere desactivar "prevenir acceso público" en el
-   bucket). Así las URLs `https://storage.googleapis.com/<bucket>/...` son
-   visibles en la tienda.
-3. Define las variables de entorno del backend:
-   ```
-   GCS_BUCKET=ecommerce-chilate
-   GCS_PROJECT_ID=tu-proyecto-gcp
-   ```
-4. Credenciales:
-   - **Cloud Run:** usa la service account del servicio (dale el rol
-     `Storage Object Admin` sobre el bucket). No necesitas archivo de clave.
-   - **Local:** crea una service account con `Storage Object Admin`, descarga
-     su JSON y exporta `GOOGLE_APPLICATION_CREDENTIALS=/ruta/al.json`.
+## Seguridad y buenas prácticas
 
-El endpoint `POST /api/uploads` (solo staff) recibe el archivo y devuelve la URL.
+- Config de entorno **validada al arranque**: si falta `DATABASE_URL` o `JWT_SECRET`,
+  el backend no inicia.
+- Contraseñas con **bcrypt**; autorización con **JWT + guards por rol** en el backend.
+- El **bucket de GCS es privado**: las imágenes se sirven por un proxy del backend,
+  nunca se expone el bucket a Internet.
+- **Secretos fuera de git**: `backend/.env`, el JSON de la service account
+  (`*-credentials.json`, `ecommercechilate-*.json`) y las claves de Gmail no se
+  versionan (ver `.gitignore`). En producción, usa **Secret Manager** en Cloud Run.
+- **Calidad**: ESLint + Prettier en ambos proyectos (`npm run lint`, `npm run format`).
 
-## Ir a pagos reales
-Reemplaza `PaymentsService.charge()` en `backend/src/payments/payments.service.ts`
-por una integración con Wompi o Stripe, manteniendo la misma firma. El resto del
-flujo de checkout no cambia.
-```
+---
+
+## Pasar a pagos reales
+
+Reemplaza `PaymentsService.charge()` en
+`backend/src/payments/payments.service.ts` por una integración real (Wompi, Stripe,
+etc.) manteniendo la misma firma. El resto del flujo de checkout no cambia.

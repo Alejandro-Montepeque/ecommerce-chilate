@@ -1,0 +1,67 @@
+name: Desplegar backend (Cloud Run)
+
+# Se ejecuta al hacer push a main que toque el backend, o manualmente desde
+# la pestaña Actions (botón "Run workflow"). Cada corrida es visible en Actions.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+env:
+  SERVICE: chilate-api
+  REGION: us-central1 # cámbialo si usas otra región
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Autenticación con GCP usando la llave de la service account de despliegue.
+      - name: Autenticar en Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # Desplegar. Cloud Build construye la imagen desde backend/Dockerfile.
+      # Las variables de entorno se pasan por archivo para soportar valores con
+      # caracteres especiales (URLs con comas, etc.).
+      - name: Desplegar en Cloud Run
+        working-directory: backend
+        run: |
+          cat > "$RUNNER_TEMP/env.yaml" <<EOF
+          DATABASE_URL: "${{ secrets.DATABASE_URL }}"
+          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+          JWT_EXPIRES_IN: "7d"
+          CORS_ORIGINS: "${{ secrets.CORS_ORIGINS }}"
+          PUBLIC_API_URL: "${{ secrets.PUBLIC_API_URL }}"
+          GCS_BUCKET: "${{ secrets.GCS_BUCKET }}"
+          GCS_PROJECT_ID: "${{ secrets.GCP_PROJECT_ID }}"
+          GMAIL_USER: "${{ secrets.GMAIL_USER }}"
+          GMAIL_APP_PASSWORD: "${{ secrets.GMAIL_APP_PASSWORD }}"
+          TZ: "America/El_Salvador"
+          EOF
+
+          gcloud run deploy "$SERVICE" \
+            --source . \
+            --region "$REGION" \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --allow-unauthenticated \
+            --env-vars-file "$RUNNER_TEMP/env.yaml" \
+            --quiet
+
+      - name: Mostrar URL del servicio
+        run: |
+          gcloud run services describe "$SERVICE" \
+            --region "$REGION" \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --format 'value(status.url)'
