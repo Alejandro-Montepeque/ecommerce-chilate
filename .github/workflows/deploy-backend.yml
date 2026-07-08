@@ -37,14 +37,17 @@ jobs:
         with:
           node-version: 20
 
-      # Aplica el esquema a Neon ANTES de publicar la nueva revisión, para que la
-      # base siempre coincida con el código. Usamos `db push` porque el proyecto
-      # no maneja migraciones versionadas. No siembra datos (el seed va aparte).
-      - name: Aplicar esquema a la base (Prisma db push)
+      # ANTES de publicar la nueva revisión: 1) aplica las migraciones
+      # versionadas a Neon (Prisma registra cada una en `_prisma_migrations`,
+      # así no se repiten) y 2) corre los seeders (cada uno se ejecuta una vez,
+      # registrado en SeederLog). Ambos pasos son seguros en cada deploy.
+      - name: Migraciones + seeders (Prisma)
         working-directory: backend
         run: |
           npm ci
-          npx prisma db push --skip-generate
+          npx prisma migrate deploy   # aplica prisma/migrations/*
+          npx prisma generate         # cliente para el seed
+          npm run prisma:seed         # seeders idempotentes (guardados por SeederLog)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 

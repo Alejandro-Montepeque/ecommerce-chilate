@@ -19,6 +19,7 @@ import DiscountsAdminPage from "@/pages/admin/DiscountsAdminPage";
 import BannersAdminPage from "@/pages/admin/BannersAdminPage";
 import ContentAdminPage from "@/pages/admin/ContentAdminPage";
 import UsersAdminPage from "@/pages/admin/UsersAdminPage";
+import AuditAdminPage from "@/pages/admin/AuditAdminPage";
 
 export default function App() {
   return (
@@ -103,6 +104,14 @@ export default function App() {
           element={
             <RequireAdmin>
               <UsersAdminPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="auditoria"
+          element={
+            <RequireAdmin>
+              <AuditAdminPage />
             </RequireAdmin>
           }
         />

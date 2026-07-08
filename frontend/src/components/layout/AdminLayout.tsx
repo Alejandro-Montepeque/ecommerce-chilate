@@ -69,6 +69,11 @@ export function AdminLayout() {
             Usuarios
           </NavLink>
         )}
+        {can.audit(user?.role) && (
+          <NavLink to="/admin/auditoria" className={linkClass}>
+            Auditoría
+          </NavLink>
+        )}
       </nav>
 
       <div className="mt-auto rounded-2xl bg-zinc-50 p-3">

@@ -11,6 +11,7 @@ export const can = {
   content: (role?: Role) => role === "ADMIN" || role === "MAINTENANCE",
   users: (role?: Role) => role === "ADMIN",
   orders: (role?: Role) => role === "ADMIN",
+  audit: (role?: Role) => role === "ADMIN",
 };
 
 export const ROLE_LABELS: Record<Role, string> = {
