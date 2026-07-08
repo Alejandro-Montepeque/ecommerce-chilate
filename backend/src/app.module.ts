@@ -17,6 +17,7 @@ import { UploadsModule } from "./uploads/uploads.module";
 import { WishlistModule } from "./wishlist/wishlist.module";
 import { DiscountsModule } from "./discounts/discounts.module";
 import { MailModule } from "./mail/mail.module";
+import { AuditModule } from "./audit/audit.module";
 import { HealthController } from "./health.controller";
 
 @Module({
@@ -38,6 +39,7 @@ import { HealthController } from "./health.controller";
     WishlistModule,
     DiscountsModule,
     MailModule,
+    AuditModule,
   ],
   controllers: [HealthController],
 })

@@ -17,6 +17,7 @@ COPY . .
 
 EXPOSE 8080
 
-# db push crea las tablas desde schema.prisma (sin necesitar migraciones),
-# siembra datos (sin tumbar el arranque si algo falla) y levanta el server.
-CMD ["sh", "-c", "npx prisma db push && (npm run prisma:seed || echo 'seed omitido') && npm run start:dev"]
+# Aplica las migraciones versionadas (prisma/migrations/*), corre los seeders
+# (idempotentes, guardados por SeederLog) y levanta el server en watch.
+# Requiere haber generado la migración inicial: `npx prisma migrate dev --name init`.
+CMD ["sh", "-c", "npx prisma migrate deploy && (npm run prisma:seed || echo 'seed omitido') && npm run start:dev"]

@@ -89,18 +89,20 @@ El esquema está en `prisma/schema.prisma`. Entidades principales:
 - **Discount** (porcentaje + rango de fechas por producto).
 - **Banner** y **SiteContent** (contenido bilingüe editable de la landing/correos).
 - **Order** + **OrderItem** (pedidos e ítems, con precios "congelados").
+- **AuditLog** (bitácora de escrituras internas) y **SeederLog** (control de seeders).
 
-Flujos:
+Migraciones y seeders (versionado con **Prisma Migrate**):
 
-- **Desarrollo:** `npx prisma db push` sincroniza el esquema sin migraciones
-  (es lo que hace el contenedor de dev). Ideal para iterar rápido.
-- **Producción:** aplica el esquema contra Neon una vez —`prisma db push` o, si
-  prefieres migraciones versionadas, `prisma migrate deploy`— y corre el seed.
-- El **seed es idempotente**: no pisa datos existentes; crea el admin y los
-  catálogos base solo si faltan.
-
-> La imagen de producción **no** ejecuta `db push` ni el seed automáticamente:
-> ese paso se hace manualmente (ver `../DEPLOYMENT.md`).
+- **Esquema:** migraciones versionadas en `prisma/migrations/`. Prisma registra las
+  aplicadas en `_prisma_migrations` (no se repiten). Primera vez en local:
+  `npx prisma migrate dev --name init`; en cada deploy: `prisma migrate deploy`.
+- **Seeders:** separados por dominio en `prisma/seeders/` (`admin`, `catalogs`,
+  `landing`, `emails`) y orquestados por `prisma/seed.ts`. Cada seeder se registra
+  en **`SeederLog`** y se ejecuta **una sola vez** (idempotente). **No siembra
+  productos**: la tienda arranca vacía.
+- El workflow de despliegue corre `migrate deploy` → `generate` → `prisma:seed`
+  antes de publicar la revisión (ver `../DEPLOYMENT.md`). Para reejecutar un
+  seeder, borra su fila en `SeederLog`.
 
 ---
 
@@ -125,6 +127,7 @@ Cada módulo NestJS es independiente (controlador + servicio + DTOs cuando aplic
 | `payments/` | Pasarela **simulada** (aísla el cobro del checkout). |
 | `mail/` | Envío de correos (Gmail SMTP) con textos editables. |
 | `uploads/` | Subida a GCS y proxy de imágenes del bucket privado. |
+| `audit/` | Interceptor que registra escrituras internas + consulta de la bitácora (solo ADMIN). |
 
 ---
 
@@ -192,6 +195,11 @@ Prefijo: `/api`. "Público" = sin token. Los demás requieren `Authorization: Be
 | POST | `/orders/checkout` | Público (auth opcional). Descuenta stock, cobra (simulado) y envía el correo de compra. |
 | GET | `/orders/me` | Autenticado (mis órdenes). |
 | GET | `/orders` | ADMIN (todas). |
+
+### Auditoría
+| Método | Ruta | Acceso |
+|--------|------|--------|
+| GET | `/audit` | **ADMIN**. Bitácora paginada de escrituras de usuarios internos (`?take=&skip=`). |
 
 ### Uploads (imágenes)
 | Método | Ruta | Acceso |

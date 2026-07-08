@@ -31,6 +31,13 @@ enum Subcategory {
   UNISEX
 }
 
+// Tipo de acción registrada en la auditoría.
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 model User {
   id        String         @id @default(uuid())
   email     String         @unique
@@ -39,7 +46,34 @@ model User {
   role      Role           @default(CUSTOMER)
   orders    Order[]
   wishlist  WishlistItem[]
+  auditLogs AuditLog[]
   createdAt DateTime       @default(now())
+}
+
+// Registro de ejecución de seeders: cada seeder se corre UNA sola vez.
+// El runner (prisma/seed.ts) consulta esta tabla antes de ejecutar cada uno.
+model SeederLog {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  executedAt DateTime @default(now())
+}
+
+// Bitácora de acciones de usuarios internos (crear/editar/eliminar).
+// Los datos del actor se desnormalizan (email/rol) para que el registro
+// sobreviva aunque el usuario se elimine después.
+model AuditLog {
+  id         String      @id @default(uuid())
+  actor      User?       @relation(fields: [actorId], references: [id])
+  actorId    String?
+  actorEmail String
+  actorRole  String
+  action     AuditAction
+  entity     String // recurso afectado (products, categories, discounts, ...)
+  entityId   String? // id del recurso, si aplica
+  details    String? // resumen legible / JSON corto
+  createdAt  DateTime    @default(now())
+
+  @@index([createdAt])
 }
 
 // Lista de deseos (por usuario autenticado).
