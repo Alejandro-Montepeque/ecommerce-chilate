@@ -51,6 +51,10 @@ model User {
   mustChangePassword    Boolean   @default(false)
   tempPasswordExpiresAt DateTime?
 
+  // Super administrador oculto: no aparece en la lista de usuarios del panel y
+  // no puede ser modificado ni eliminado por otros administradores.
+  isSuperAdmin Boolean @default(false)
+
   orders    Order[]
   wishlist  WishlistItem[]
   auditLogs AuditLog[]

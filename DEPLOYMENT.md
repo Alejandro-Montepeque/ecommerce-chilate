@@ -143,7 +143,12 @@ gcloud run deploy chilate-api \
 `.github/workflows/deploy-backend.yml` corre al hacer **push a `main`** que toque
 `backend/`, o manualmente (**Run workflow**). Cada corrida se ve en la pestaña
 **Actions**. Pasos: autenticar en GCP → **`prisma migrate deploy`** → `prisma
-generate` → **`npm run prisma:seed`** → `gcloud run deploy` → mostrar URL.
+generate` → **`npm run prisma:seed`** → **construir la imagen con caché de capas
+(Buildx + GitHub Actions cache) y subirla a Artifact Registry** → `gcloud run
+deploy --image` (despliega la imagen ya construida, sin reconstruir en Cloud
+Build) → mostrar URL. La caché hace que, si no cambian `package.json` ni
+`prisma/`, las capas de `npm ci` y `prisma generate` se reutilicen y la build
+tarde segundos.
 
 ### 7.1 Secrets de GitHub (Settings → Secrets and variables → Actions)
 

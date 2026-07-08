@@ -13,6 +13,7 @@ on:
 env:
   SERVICE: chilate-api
   REGION: us-central1 # cámbialo si usas otra región
+  REPO: cloud-run-source-deploy # repo de Artifact Registry (ya existe)
 
 jobs:
   deploy:
@@ -21,7 +22,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Autenticación con GCP usando la llave de la service account de despliegue.
       - name: Autenticar en Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -36,26 +36,42 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      # ANTES de publicar la nueva revisión: 1) aplica las migraciones
-      # versionadas a Neon (Prisma registra cada una en `_prisma_migrations`,
-      # así no se repiten) y 2) corre los seeders (cada uno se ejecuta una vez,
-      # registrado en SeederLog). Ambos pasos son seguros en cada deploy.
+      # Migraciones + seeders contra Neon (rápido; npm cacheado por el paso anterior).
       - name: Migraciones + seeders (Prisma)
         working-directory: backend
         run: |
           npm ci
-          npx prisma migrate deploy   # aplica prisma/migrations/*
-          npx prisma generate         # cliente para el seed
-          npm run prisma:seed         # seeders idempotentes (guardados por SeederLog)
+          npx prisma migrate deploy
+          npx prisma generate
+          npm run prisma:seed
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      # Desplegar. Cloud Build construye la imagen desde backend/Dockerfile.
-      # Las variables de entorno se pasan por archivo para soportar valores con
-      # caracteres especiales (URLs con comas, etc.).
+      # Login de Docker contra Artifact Registry (usa la SA ya autenticada).
+      - name: Configurar Docker para Artifact Registry
+        run: gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+
+      - name: Configurar Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Construye la imagen CON caché de capas (GitHub Actions cache). Si no
+      # cambian package.json / prisma/, las capas de npm ci y prisma generate se
+      # reutilizan → la build tarda segundos en vez de minutos.
+      - name: Construir y subir imagen (con caché)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Despliega SOLO la imagen ya construida (no reconstruye en Cloud Build).
       - name: Desplegar en Cloud Run
-        working-directory: backend
         run: |
           cat > "$RUNNER_TEMP/env.yaml" <<EOF
           DATABASE_URL: "${{ secrets.DATABASE_URL }}"
@@ -71,7 +87,7 @@ jobs:
           EOF
 
           gcloud run deploy "$SERVICE" \
-            --source . \
+            --image "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO/$SERVICE:${{ github.sha }}" \
             --region "$REGION" \
             --project "${{ secrets.GCP_PROJECT_ID }}" \
             --allow-unauthenticated \

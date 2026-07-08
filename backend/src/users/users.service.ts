@@ -29,7 +29,9 @@ export class UsersService {
   ) {}
 
   findAll() {
+    // El super administrador NO se lista (queda oculto para todos).
     return this.prisma.user.findMany({
+      where: { isSuperAdmin: false },
       select: {
         id: true,
         email: true,
@@ -83,9 +85,11 @@ export class UsersService {
   async resetPassword(id: string) {
     const target = await this.prisma.user.findUnique({
       where: { id },
-      select: { email: true, fullName: true, role: true },
+      select: { email: true, fullName: true, role: true, isSuperAdmin: true },
     });
-    if (!target) throw new NotFoundException("Usuario no encontrado");
+    // Si no existe o es el super admin, se responde igual (no se revela).
+    if (!target || target.isSuperAdmin)
+      throw new NotFoundException("Usuario no encontrado");
     if (target.role === Role.CUSTOMER) {
       throw new ForbiddenException(
         "Solo se restablece el acceso de usuarios internos.",
@@ -115,9 +119,11 @@ export class UsersService {
   async setRole(id: string, role: Role) {
     const target = await this.prisma.user.findUnique({
       where: { id },
-      select: { role: true },
+      select: { role: true, isSuperAdmin: true },
     });
-    if (!target) throw new NotFoundException("Usuario no encontrado");
+    // El super admin no existe "para efectos" de gestión: no se puede tocar.
+    if (!target || target.isSuperAdmin)
+      throw new NotFoundException("Usuario no encontrado");
 
     if (target.role === Role.ADMIN && role !== Role.ADMIN) {
       throw new ForbiddenException(
