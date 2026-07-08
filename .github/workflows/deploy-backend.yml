@@ -32,6 +32,22 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Aplica el esquema a Neon ANTES de publicar la nueva revisión, para que la
+      # base siempre coincida con el código. Usamos `db push` porque el proyecto
+      # no maneja migraciones versionadas. No siembra datos (el seed va aparte).
+      - name: Aplicar esquema a la base (Prisma db push)
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       # Desplegar. Cloud Build construye la imagen desde backend/Dockerfile.
       # Las variables de entorno se pasan por archivo para soportar valores con
       # caracteres especiales (URLs con comas, etc.).
