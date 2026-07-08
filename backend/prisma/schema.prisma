@@ -7,7 +7,12 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Runtime: conexión "pooled" de Neon (con -pooler).
+  url = env("DATABASE_URL")
+  // Migraciones: conexión DIRECTA (sin -pooler). El pooler de Neon no soporta
+  // los advisory locks que usa Prisma Migrate. Solo la usan los comandos de
+  // migración; el runtime sigue usando url.
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {

@@ -13,6 +13,12 @@ class EnvironmentVariables {
   @IsNotEmpty()
   DATABASE_URL!: string;
 
+  // Conexión directa (sin pooler) que usa Prisma Migrate. Opcional en runtime;
+  // solo la necesitan los comandos de migración.
+  @IsOptional()
+  @IsString()
+  DIRECT_URL?: string;
+
   @IsString()
   @IsNotEmpty()
   JWT_SECRET!: string;

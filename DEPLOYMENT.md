@@ -157,6 +157,7 @@ tarde segundos.
 | `GCP_PROJECT_ID` | ID del proyecto GCP |
 | `GCP_SA_KEY` | JSON completo de la service account de despliegue (§7.2) |
 | `DATABASE_URL` | Cadena de Neon (pooled + `sslmode=require`) |
+| `DIRECT_URL` | Cadena de Neon **directa** (sin `-pooler`) — solo para migraciones |
 | `JWT_SECRET` | Cadena larga aleatoria (sin comillas `"`) |
 | `CORS_ORIGINS` | URL de Vercel |
 | `PUBLIC_API_URL` | URL de Cloud Run + `/api` |

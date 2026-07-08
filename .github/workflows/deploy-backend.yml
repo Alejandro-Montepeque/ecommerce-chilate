@@ -48,7 +48,9 @@ jobs:
           npx prisma generate
           npm run prisma:seed
         env:
+          # url (pooled) para el seed; directUrl (directa) para migrate deploy.
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       # Login de Docker contra Artifact Registry (usa la SA ya autenticada).
       - name: Configurar Docker para Artifact Registry
@@ -69,6 +71,10 @@ jobs:
           tags: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # provenance/sbom (activados por defecto en v6) rompen el COPY --from
+          # de builds multi-stage con caché → los desactivamos.
+          provenance: false
+          sbom: false
 
       # Despliega SOLO la imagen ya construida (no reconstruye en Cloud Build).
       - name: Desplegar en Cloud Run
