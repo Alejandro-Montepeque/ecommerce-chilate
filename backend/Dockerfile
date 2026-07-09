@@ -1,7 +1,6 @@
 # Imagen de producción (Cloud Run). Una sola etapa a propósito: evita el
 # `COPY --from` multi-stage que buildx falla al calcular en este runner
-# ("/app/dist not found"). Al final se podan las devDependencies para no
-# cargar la imagen.
+# ("/app/dist not found").
 FROM node:20-slim
 WORKDIR /app
 
@@ -21,8 +20,13 @@ RUN npx prisma generate
 COPY . .
 RUN npm run build
 
-# Quita devDependencies (el cliente de Prisma ya generado se conserva).
-RUN npm prune --omit=dev
+# Verifica que el compilado quedó donde el CMD lo espera. Si no, falla el build
+# aquí (con el contenido de dist) en vez de crashear en runtime.
+RUN test -f dist/main.js || (echo "ERROR: falta dist/main.js. Contenido de dist:" && ls -R dist && exit 1)
+
+# NOTA: NO usamos `npm prune --omit=dev` porque borra el cliente generado de
+# Prisma (node_modules/.prisma) y la app no arrancaría (no encuentra el engine).
+# Se conservan todas las dependencias; la imagen es un poco más grande pero fiable.
 
 ENV NODE_ENV=production
 ENV PORT=8080
