@@ -1,20 +1,29 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
   Body,
-  Param,
+  Controller,
+  Delete,
+  Get,
   Injectable,
   Module,
-  UseGuards,
+  Param,
+  Post,
+  Put,
 } from "@nestjs/common";
+import { IsBoolean, IsInt, IsOptional, IsString } from "class-validator";
 import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
+
+class BannerDto {
+  @IsOptional() @IsString() titleEs?: string;
+  @IsOptional() @IsString() titleEn?: string;
+  @IsOptional() @IsString() subtitleEs?: string;
+  @IsOptional() @IsString() subtitleEn?: string;
+  @IsOptional() @IsString() imageUrl?: string;
+  @IsOptional() @IsString() linkUrl?: string;
+  @IsOptional() @IsInt() sortOrder?: number;
+  @IsOptional() @IsBoolean() isActive?: boolean;
+}
 
 @Injectable()
 class BannersService {
@@ -28,10 +37,10 @@ class BannersService {
   findAll() {
     return this.prisma.banner.findMany({ orderBy: { sortOrder: "asc" } });
   }
-  create(data: any) {
+  create(data: BannerDto) {
     return this.prisma.banner.create({ data });
   }
-  update(id: string, data: any) {
+  update(id: string, data: BannerDto) {
     return this.prisma.banner.update({ where: { id }, data });
   }
   remove(id: string) {
@@ -48,29 +57,25 @@ class BannersController {
     return this.service.findActive();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Auth(Role.ADMIN, Role.MAINTENANCE)
   @Get("admin/all")
   findAll() {
     return this.service.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Auth(Role.ADMIN, Role.MAINTENANCE)
   @Post()
-  create(@Body() body: any) {
-    return this.service.create(body);
+  create(@Body() dto: BannerDto) {
+    return this.service.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Auth(Role.ADMIN, Role.MAINTENANCE)
   @Put(":id")
-  update(@Param("id") id: string, @Body() body: any) {
-    return this.service.update(id, body);
+  update(@Param("id") id: string, @Body() dto: BannerDto) {
+    return this.service.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Auth(Role.ADMIN, Role.MAINTENANCE)
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.service.remove(id);

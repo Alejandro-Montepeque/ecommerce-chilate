@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface CartItem {
   variantId: string;
@@ -19,33 +20,43 @@ interface CartState {
   subtotal: () => number;
 }
 
-export const useCart = create<CartState>((set, get) => ({
-  items: [],
-  add: (item) =>
-    set((state) => {
-      const existing = state.items.find((i) => i.variantId === item.variantId);
-      if (existing) {
-        return {
+// El carrito se guarda en localStorage para que no se pierda al recargar.
+export const useCart = create<CartState>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      add: (item) =>
+        set((state) => {
+          const existing = state.items.find(
+            (i) => i.variantId === item.variantId,
+          );
+          if (existing) {
+            return {
+              items: state.items.map((i) =>
+                i.variantId === item.variantId
+                  ? { ...i, quantity: i.quantity + item.quantity }
+                  : i,
+              ),
+            };
+          }
+          return { items: [...state.items, item] };
+        }),
+      remove: (variantId) =>
+        set((state) => ({
+          items: state.items.filter((i) => i.variantId !== variantId),
+        })),
+      setQty: (variantId, qty) =>
+        set((state) => ({
           items: state.items.map((i) =>
-            i.variantId === item.variantId
-              ? { ...i, quantity: i.quantity + item.quantity }
+            i.variantId === variantId
+              ? { ...i, quantity: Math.max(1, qty) }
               : i,
           ),
-        };
-      }
-      return { items: [...state.items, item] };
+        })),
+      clear: () => set({ items: [] }),
+      subtotal: () =>
+        get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
     }),
-  remove: (variantId) =>
-    set((state) => ({
-      items: state.items.filter((i) => i.variantId !== variantId),
-    })),
-  setQty: (variantId, qty) =>
-    set((state) => ({
-      items: state.items.map((i) =>
-        i.variantId === variantId ? { ...i, quantity: Math.max(1, qty) } : i,
-      ),
-    })),
-  clear: () => set({ items: [] }),
-  subtotal: () =>
-    get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
-}));
+    { name: "chilate-cart" },
+  ),
+);

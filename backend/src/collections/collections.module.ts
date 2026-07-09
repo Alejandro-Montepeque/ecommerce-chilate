@@ -1,20 +1,27 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
   Body,
-  Param,
+  Controller,
+  Delete,
+  Get,
   Injectable,
   Module,
-  UseGuards,
+  Param,
+  Post,
+  Put,
 } from "@nestjs/common";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
+
+class CollectionDto {
+  @IsString() @IsNotEmpty() slug!: string;
+  @IsString() @IsNotEmpty() nameEs!: string;
+  @IsString() @IsNotEmpty() nameEn!: string;
+  @IsOptional() @IsString() descriptionEs?: string;
+  @IsOptional() @IsString() descriptionEn?: string;
+  @IsOptional() @IsBoolean() isActive?: boolean;
+}
 
 @Injectable()
 class CollectionsService {
@@ -25,10 +32,10 @@ class CollectionsService {
   findAll() {
     return this.prisma.collection.findMany();
   }
-  create(data: any) {
+  create(data: CollectionDto) {
     return this.prisma.collection.create({ data });
   }
-  update(id: string, data: any) {
+  update(id: string, data: CollectionDto) {
     return this.prisma.collection.update({ where: { id }, data });
   }
   remove(id: string) {
@@ -45,29 +52,25 @@ class CollectionsController {
     return this.service.findActive();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Get("admin/all")
   findAll() {
     return this.service.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Post()
-  create(@Body() body: any) {
-    return this.service.create(body);
+  create(@Body() dto: CollectionDto) {
+    return this.service.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Put(":id")
-  update(@Param("id") id: string, @Body() body: any) {
-    return this.service.update(id, body);
+  update(@Param("id") id: string, @Body() dto: CollectionDto) {
+    return this.service.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.service.remove(id);

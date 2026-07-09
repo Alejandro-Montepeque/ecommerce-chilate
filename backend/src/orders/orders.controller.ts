@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { OrdersService } from "./orders.service";
 import { CreateOrderDto } from "./dto/order.dto";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
 import {
   CurrentUser,
   JwtUser,
@@ -18,8 +17,8 @@ export class OrdersController {
   // Checkout público: funciona como invitado o con sesión (opcional).
   @UseGuards(OptionalJwtGuard)
   @Post("checkout")
-  checkout(@Body() dto: CreateOrderDto, @Req() req: any) {
-    return this.orders.checkout(dto, req.user?.userId);
+  checkout(@Body() dto: CreateOrderDto, @CurrentUser() user?: JwtUser) {
+    return this.orders.checkout(dto, user?.userId);
   }
 
   // Cliente autenticado: sus propias órdenes.
@@ -30,8 +29,7 @@ export class OrdersController {
   }
 
   // Solo ADMIN puede ver todas las órdenes.
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   @Get()
   findAll() {
     return this.orders.findAll();

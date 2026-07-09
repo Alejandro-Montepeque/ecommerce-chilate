@@ -8,13 +8,16 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
 } from "@nestjs/common";
+import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
+
+class SizeDto {
+  @IsString() @IsNotEmpty() label!: string;
+  @IsOptional() @IsInt() sortOrder?: number;
+}
 
 @Injectable()
 class SizesService {
@@ -22,10 +25,10 @@ class SizesService {
   findAll() {
     return this.prisma.size.findMany({ orderBy: { sortOrder: "asc" } });
   }
-  create(data: { label: string; sortOrder?: number }) {
+  create(data: SizeDto) {
     return this.prisma.size.create({ data });
   }
-  update(id: string, data: { label?: string; sortOrder?: number }) {
+  update(id: string, data: SizeDto) {
     return this.prisma.size.update({ where: { id }, data });
   }
   remove(id: string) {
@@ -42,22 +45,19 @@ class SizesController {
     return this.service.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Post()
-  create(@Body() body: { label: string; sortOrder?: number }) {
-    return this.service.create(body);
+  create(@Body() dto: SizeDto) {
+    return this.service.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Put(":id")
-  update(@Param("id") id: string, @Body() body: { label?: string }) {
-    return this.service.update(id, body);
+  update(@Param("id") id: string, @Body() dto: SizeDto) {
+    return this.service.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.service.remove(id);

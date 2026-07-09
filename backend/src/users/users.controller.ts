@@ -1,22 +1,16 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { IsEnum } from "class-validator";
 import { Role } from "@prisma/client";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
+
+class SetRoleDto {
+  @IsEnum(Role) role!: Role;
+}
 
 @Controller("users")
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN) // toda la gestión de usuarios es solo para ADMIN
+@Auth(Role.ADMIN) // toda la gestión de usuarios es solo para ADMIN
 export class UsersController {
   constructor(private users: UsersService) {}
 
@@ -31,8 +25,8 @@ export class UsersController {
   }
 
   @Patch(":id/role")
-  setRole(@Param("id") id: string, @Body("role") role: Role) {
-    return this.users.setRole(id, role);
+  setRole(@Param("id") id: string, @Body() dto: SetRoleDto) {
+    return this.users.setRole(id, dto.role);
   }
 
   // Reenvía/restablece la contraseña temporal de un usuario interno.

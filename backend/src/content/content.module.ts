@@ -1,18 +1,21 @@
 import {
+  Body,
   Controller,
   Get,
-  Put,
-  Body,
-  Param,
   Injectable,
   Module,
-  UseGuards,
+  Param,
+  Put,
 } from "@nestjs/common";
+import { IsOptional, IsString } from "class-validator";
 import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
+
+class ContentDto {
+  @IsOptional() @IsString() valueEs?: string;
+  @IsOptional() @IsString() valueEn?: string;
+}
 
 // Textos editables de la landing (hero, footer, etc.), bilingües.
 @Injectable()
@@ -39,14 +42,10 @@ class ContentController {
     return this.service.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.MAINTENANCE)
+  @Auth(Role.ADMIN, Role.MAINTENANCE)
   @Put(":key")
-  upsert(
-    @Param("key") key: string,
-    @Body() body: { valueEs?: string; valueEn?: string },
-  ) {
-    return this.service.upsert(key, body.valueEs, body.valueEn);
+  upsert(@Param("key") key: string, @Body() dto: ContentDto) {
+    return this.service.upsert(key, dto.valueEs, dto.valueEn);
   }
 }
 

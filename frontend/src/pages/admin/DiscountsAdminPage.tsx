@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
-import { Spinner } from "@/components/ui/Spinner";
+import { Card } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { alerts } from "@/lib/alerts";
 
 const fmt = (iso: string) =>
@@ -119,36 +121,29 @@ export default function DiscountsAdminPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold tracking-tight text-zinc-900">
-        Descuentos programados
-      </h1>
-      <p className="mb-6 text-zinc-500">
-        Programa descuentos por producto con fecha de inicio y fin. La tienda
-        aplica el precio rebajado automáticamente dentro del rango.
-      </p>
+      <PageHeader
+        title="Descuentos programados"
+        subtitle="Programa descuentos por producto con fecha de inicio y fin. La tienda aplica el precio rebajado automáticamente dentro del rango."
+      />
 
       {/* Nuevo descuento */}
-      <div className="mb-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-card">
+      <Card className="mb-6 p-6">
         <p className="mb-4 text-sm font-medium text-zinc-500">
           Nuevo descuento
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-600">
-              Producto
-            </span>
-            <Select
-              value={productId}
-              onChange={(e) => setProductId(e.target.value)}
-            >
-              <option value="">Selecciona…</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nameEs}
-                </option>
-              ))}
-            </Select>
-          </label>
+          <Select
+            label="Producto"
+            value={productId}
+            onChange={(e) => setProductId(e.target.value)}
+          >
+            <option value="">Selecciona…</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nameEs}
+              </option>
+            ))}
+          </Select>
           <Input
             label="Descuento (%)"
             type="number"
@@ -175,60 +170,43 @@ export default function DiscountsAdminPage() {
         <Button className="mt-4" onClick={submit} disabled={create.isPending}>
           Programar descuento
         </Button>
-      </div>
+      </Card>
 
       {/* Lista */}
-      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-card">
-        {isLoading ? (
-          <Spinner />
-        ) : discounts.length === 0 ? (
-          <p className="p-8 text-center text-sm text-zinc-500">
-            No hay descuentos programados.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100 bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
-                  <th className="px-5 py-3 font-medium">Producto</th>
-                  <th className="px-5 py-3 font-medium">%</th>
-                  <th className="px-5 py-3 font-medium">Vigencia</th>
-                  <th className="px-5 py-3 font-medium">Estado</th>
-                  <th className="px-5 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {discounts.map((d) => (
-                  <tr key={d.id} className="hover:bg-zinc-50/50">
-                    <td className="px-5 py-3 font-medium text-zinc-900">
-                      {d.product?.nameEs ?? "—"}
-                    </td>
-                    <td className="px-5 py-3 text-zinc-700">-{d.percent}%</td>
-                    <td className="px-5 py-3 text-xs text-zinc-500">
-                      {fmt(d.startsAt)} → {fmt(d.endsAt)}
-                    </td>
-                    <td className="px-5 py-3">{status(d)}</td>
-                    <td className="px-5 py-3 text-right">
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={async () => {
-                          if (await alerts.confirm("¿Eliminar este descuento?"))
-                            del.mutate(d.id, {
-                              onSuccess: () => alerts.success("Eliminado"),
-                            });
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <DataTable
+        headers={["Producto", "%", "Vigencia", "Estado", ""]}
+        minWidth="680px"
+        isLoading={isLoading}
+        isEmpty={discounts.length === 0}
+        emptyText="No hay descuentos programados."
+      >
+        {discounts.map((d) => (
+          <tr key={d.id} className="hover:bg-zinc-50/50">
+            <td className="px-5 py-3 font-medium text-zinc-900">
+              {d.product?.nameEs ?? "—"}
+            </td>
+            <td className="px-5 py-3 text-zinc-700">-{d.percent}%</td>
+            <td className="px-5 py-3 text-xs text-zinc-500">
+              {fmt(d.startsAt)} → {fmt(d.endsAt)}
+            </td>
+            <td className="px-5 py-3">{status(d)}</td>
+            <td className="px-5 py-3 text-right">
+              <Button
+                size="sm"
+                variant="danger"
+                onClick={async () => {
+                  if (await alerts.confirm("¿Eliminar este descuento?"))
+                    del.mutate(d.id, {
+                      onSuccess: () => alerts.success("Eliminado"),
+                    });
+                }}
+              >
+                Eliminar
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
     </div>
   );
 }

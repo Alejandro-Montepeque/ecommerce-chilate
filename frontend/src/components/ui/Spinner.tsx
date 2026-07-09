@@ -1,9 +1,11 @@
-import { useTranslation } from "react-i18next";
-
-// Indicador de carga reutilizable.
-export function Spinner() {
-  const { t } = useTranslation();
+// Indicador de carga reutilizable (spinner animado, accesible).
+export function Spinner({ className = "" }: { className?: string }) {
   return (
-    <p className="text-gray-500 py-8 text-center">{t("common.loading")}</p>
+    <div className={`flex justify-center py-8 ${className}`} role="status">
+      <span
+        className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-brand-600"
+        aria-label="Cargando"
+      />
+    </div>
   );
 }

@@ -1,20 +1,25 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
   Body,
-  Param,
+  Controller,
+  Delete,
+  Get,
   Injectable,
   Module,
-  UseGuards,
+  Param,
+  Post,
+  Put,
 } from "@nestjs/common";
+import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
+
+class CategoryDto {
+  @IsString() @IsNotEmpty() slug!: string;
+  @IsString() @IsNotEmpty() nameEs!: string;
+  @IsString() @IsNotEmpty() nameEn!: string;
+  @IsOptional() @IsInt() sortOrder?: number;
+}
 
 @Injectable()
 class CategoriesService {
@@ -22,10 +27,10 @@ class CategoriesService {
   findAll() {
     return this.prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
   }
-  create(data: any) {
+  create(data: CategoryDto) {
     return this.prisma.category.create({ data });
   }
-  update(id: string, data: any) {
+  update(id: string, data: CategoryDto) {
     return this.prisma.category.update({ where: { id }, data });
   }
   remove(id: string) {
@@ -42,22 +47,19 @@ class CategoriesController {
     return this.service.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Post()
-  create(@Body() body: any) {
-    return this.service.create(body);
+  create(@Body() dto: CategoryDto) {
+    return this.service.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Put(":id")
-  update(@Param("id") id: string, @Body() body: any) {
-    return this.service.update(id, body);
+  update(@Param("id") id: string, @Body() dto: CategoryDto) {
+    return this.service.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.service.remove(id);

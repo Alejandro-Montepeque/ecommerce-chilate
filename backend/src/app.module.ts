@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
+import { APP_FILTER } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { validateEnv } from "./config/env.validation";
+import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
@@ -42,5 +44,6 @@ import { HealthController } from "./health.controller";
     AuditModule,
   ],
   controllers: [HealthController],
+  providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })
 export class AppModule {}

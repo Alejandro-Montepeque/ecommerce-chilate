@@ -12,16 +12,24 @@ import {
   type Subcategory,
 } from "@/features/products/subcategory";
 import { Spinner } from "@/components/ui/Spinner";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function ShopPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
-  const { data: products = [], isLoading } = usePublishedProducts();
+  const { data: products = [], isLoading, isError } = usePublishedProducts();
   const { data: categories = [] } = useCategories();
   const [category, setCategory] = useState<string | null>(null);
   const [sub, setSub] = useState<Subcategory | null>(null);
 
   if (isLoading) return <Spinner />;
+  if (isError)
+    return (
+      <EmptyState>
+        No pudimos cargar los productos. Revisa tu conexión e inténtalo de
+        nuevo.
+      </EmptyState>
+    );
 
   const filtered = products.filter(
     (p) =>
@@ -78,9 +86,7 @@ export default function ShopPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-300 p-16 text-center text-zinc-500">
-          {t("shop.empty")}
-        </div>
+        <EmptyState>{t("shop.empty")}</EmptyState>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((product) => (

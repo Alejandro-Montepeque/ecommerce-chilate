@@ -8,19 +8,17 @@ import {
   Module,
   Param,
   Post,
-  UseGuards,
 } from "@nestjs/common";
+import { IsInt, IsString, Max, Min } from "class-validator";
 import { Role } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { Auth } from "../common/decorators/auth.decorator";
 
-interface CreateDiscountBody {
-  productId: string;
-  percent: number;
-  startsAt: string;
-  endsAt: string;
+class CreateDiscountDto {
+  @IsString() productId!: string;
+  @IsInt() @Min(1) @Max(100) percent!: number;
+  @IsString() startsAt!: string; // ISO; el rango se valida en el service
+  @IsString() endsAt!: string;
 }
 
 @Injectable()
@@ -59,7 +57,7 @@ class DiscountsService {
     return { state: "none" };
   }
 
-  create(body: CreateDiscountBody) {
+  create(body: CreateDiscountDto) {
     const start = new Date(body.startsAt);
     const end = new Date(body.endsAt);
 
@@ -110,22 +108,19 @@ class DiscountsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   findAll() {
     return this.service.findAll();
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
-  create(@Body() body: CreateDiscountBody) {
+  @Auth(Role.ADMIN, Role.CATALOG)
+  create(@Body() body: CreateDiscountDto) {
     return this.service.create(body);
   }
 
   @Delete(":id")
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.CATALOG)
+  @Auth(Role.ADMIN, Role.CATALOG)
   remove(@Param("id") id: string) {
     return this.service.remove(id);
   }
