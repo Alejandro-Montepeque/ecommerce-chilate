@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { AuthProvider } from "@/context/AuthContext";
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { ErrorBoundary } from "@/components/ui";
 import { queryClient } from "@/lib/queryClient";
 import "@fontsource-variable/nunito";
 import "./i18n";

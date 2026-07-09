@@ -24,21 +24,29 @@ import type {
   VariantInput,
   ProductInput,
 } from "@/features/products/products.api";
+import {
+  buildCombos,
+  comboKey,
+  toggleValue,
+  ImageField,
+  SizeSelector,
+  ColorSelector,
+  StockMatrix,
+} from "@/features/products/form";
+import { slugify } from "@/lib/slugify";
 import { alerts } from "@/lib/alerts";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Spinner } from "@/components/ui/Spinner";
+import {
+  Button,
+  Card,
+  Input,
+  Select,
+  Spinner,
+  Textarea,
+} from "@/components/ui";
 
-function slugify(text: string) {
-  const base = text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-  return `${base || "producto"}-${Math.random().toString(36).slice(2, 6)}`;
-}
+// Slug único: base legible + sufijo corto aleatorio para evitar colisiones.
+const uniqueSlug = (name: string) =>
+  `${slugify(name) || "producto"}-${Math.random().toString(36).slice(2, 6)}`;
 
 const schema = z.object({
   nameEs: z.string().min(2, "Ingresa el nombre"),
@@ -82,8 +90,6 @@ export default function ProductFormPage() {
     defaultValues: { isPublished: true },
   });
 
-  const comboKey = (s: string, c: string) => `${s}|${c}`;
-
   // Prefill en modo edición cuando llega el producto.
   useEffect(() => {
     if (!isEdit || !existing || prefilled) return;
@@ -108,16 +114,7 @@ export default function ProductFormPage() {
     setPrefilled(true);
   }, [isEdit, existing, prefilled, reset]);
 
-  const toggle = (list: string[], value: string) =>
-    list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
-
-  const combos = useMemo(() => {
-    if (sizes.length && colors.length)
-      return sizes.flatMap((s) => colors.map((c) => ({ size: s, color: c })));
-    if (sizes.length) return sizes.map((s) => ({ size: s, color: "" }));
-    if (colors.length) return colors.map((c) => ({ size: "", color: c }));
-    return [{ size: "", color: "" }];
-  }, [sizes, colors]);
+  const combos = useMemo(() => buildCombos(sizes, colors), [sizes, colors]);
 
   async function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -158,7 +155,7 @@ export default function ProductFormPage() {
     }
 
     const payload: ProductInput = {
-      slug: existing?.slug ?? slugify(form.nameEs),
+      slug: existing?.slug ?? uniqueSlug(form.nameEs),
       nameEs: form.nameEs,
       nameEn: form.nameEn || form.nameEs,
       descriptionEs: form.descriptionEs || null,
@@ -191,9 +188,6 @@ export default function ProductFormPage() {
     return <p className="text-zinc-500">Producto no encontrado.</p>;
 
   const saving = createProduct.isPending || updateProduct.isPending;
-  const card = "rounded-2xl border border-zinc-200 bg-white p-6 shadow-card";
-  const errMsg = (m?: string) =>
-    m ? <p className="mt-1 text-xs text-red-600">{m}</p> : null;
 
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
@@ -207,205 +201,82 @@ export default function ProductFormPage() {
       </div>
 
       {/* Datos básicos */}
-      <div className={card}>
+      <Card className="p-6">
         <p className="mb-4 text-sm font-medium text-zinc-500">Información</p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Input label="Nombre (ES)" {...register("nameEs")} />
-            {errMsg(errors.nameEs?.message)}
-          </div>
+          <Input
+            label="Nombre (ES)"
+            error={errors.nameEs?.message}
+            {...register("nameEs")}
+          />
           <Input label="Nombre (EN)" {...register("nameEn")} />
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-600">
-              Descripción (ES)
-            </span>
-            <textarea
-              {...register("descriptionEs")}
-              rows={2}
-              className="w-full rounded-lg border border-zinc-300 p-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-            />
-          </label>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-600">
-              Descripción (EN)
-            </span>
-            <textarea
-              {...register("descriptionEn")}
-              rows={2}
-              className="w-full rounded-lg border border-zinc-300 p-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-            />
-          </label>
+          <Textarea
+            label="Descripción (ES)"
+            rows={2}
+            {...register("descriptionEs")}
+          />
+          <Textarea
+            label="Descripción (EN)"
+            rows={2}
+            {...register("descriptionEn")}
+          />
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-600">
-              Categoría
-            </span>
-            <Select {...register("categoryId")}>
-              <option value="">Sin categoría</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nameEs}
-                </option>
-              ))}
-            </Select>
-          </label>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-zinc-600">
-              Subcategoría
-            </span>
-            <Select {...register("subcategory")}>
-              <option value="">Sin especificar</option>
-              {SUBCATEGORIES.map((s) => (
-                <option key={s} value={s}>
-                  {subcategoryLabel(s, "es")}
-                </option>
-              ))}
-            </Select>
-          </label>
-          <div>
-            <Input
-              label="Precio (USD)"
-              type="number"
-              step="0.01"
-              {...register("priceUsd")}
-            />
-            {errMsg(errors.priceUsd?.message)}
-          </div>
+          <Select label="Categoría" {...register("categoryId")}>
+            <option value="">Sin categoría</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nameEs}
+              </option>
+            ))}
+          </Select>
+          <Select label="Subcategoría" {...register("subcategory")}>
+            <option value="">Sin especificar</option>
+            {SUBCATEGORIES.map((s) => (
+              <option key={s} value={s}>
+                {subcategoryLabel(s, "es")}
+              </option>
+            ))}
+          </Select>
+          <Input
+            label="Precio (USD)"
+            type="number"
+            step="0.01"
+            error={errors.priceUsd?.message}
+            {...register("priceUsd")}
+          />
         </div>
-      </div>
+      </Card>
 
-      {/* Imagen */}
-      <div className={card}>
-        <p className="mb-4 text-sm font-medium text-zinc-500">Imagen</p>
-        <div className="flex items-center gap-4">
-          <div className="grid h-24 w-24 place-items-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 text-xs text-zinc-400">
-            {uploading ? (
-              "Subiendo..."
-            ) : preview ? (
-              <img
-                src={preview}
-                alt="preview"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              "Sin imagen"
-            )}
-          </div>
-          <div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImage}
-              className="text-sm text-zinc-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-brand-700"
-            />
-            <p className="mt-1 text-xs text-zinc-400">
-              JPG o PNG · máx. {MAX_IMAGE_MB} MB
-            </p>
-          </div>
-        </div>
-      </div>
+      <ImageField
+        preview={preview}
+        uploading={uploading}
+        maxMb={MAX_IMAGE_MB}
+        onFile={handleImage}
+      />
 
-      {/* Tallas */}
-      <div className={card}>
-        <p className="mb-3 text-sm font-medium text-zinc-500">
-          Tallas disponibles
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {sizeCatalog.map((sz) => {
-            const s = sz.label;
-            const active = sizes.includes(s);
-            return (
-              <button
-                key={sz.id}
-                type="button"
-                onClick={() => setSizes(toggle(sizes, s))}
-                className={`min-w-[2.5rem] rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                  active
-                    ? "border-brand-600 bg-brand-600 text-white"
-                    : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
-                }`}
-              >
-                {s}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <SizeSelector
+        catalog={sizeCatalog}
+        selected={sizes}
+        onToggle={(label) => setSizes(toggleValue(sizes, label))}
+      />
 
-      {/* Colores */}
-      <div className={card}>
-        <p className="mb-3 text-sm font-medium text-zinc-500">
-          Colores disponibles
-        </p>
-        <div className="flex flex-wrap gap-3">
-          {colorCatalog.map((c) => {
-            const active = colors.includes(c.name);
-            return (
-              <button
-                key={c.id}
-                type="button"
-                title={c.name}
-                aria-label={c.name}
-                aria-pressed={active}
-                onClick={() => setColors(toggle(colors, c.name))}
-                className={`h-9 w-9 rounded-full border transition-transform hover:scale-110 ${
-                  active
-                    ? "border-brand-600 ring-2 ring-brand-600 ring-offset-2"
-                    : "border-black/10"
-                }`}
-                style={{ backgroundColor: c.hex }}
-              />
-            );
-          })}
-        </div>
-      </div>
+      <ColorSelector
+        catalog={colorCatalog}
+        selected={colors}
+        onToggle={(name) => setColors(toggleValue(colors, name))}
+      />
 
-      {/* Matriz de stock */}
-      <div className={card}>
-        <p className="mb-3 text-sm font-medium text-zinc-500">
-          Stock por variante
-        </p>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {combos.map((c) => {
-            const key = comboKey(c.size, c.color);
-            const hex = colorCatalog.find((x) => x.name === c.color)?.hex;
-            const label =
-              [c.size, c.color].filter(Boolean).join(" · ") || "Único";
-            return (
-              <div
-                key={key}
-                className="flex items-center gap-2 rounded-lg border border-zinc-200 p-2"
-              >
-                {hex && (
-                  <span
-                    className="h-4 w-4 shrink-0 rounded-full border border-black/10"
-                    style={{ backgroundColor: hex }}
-                  />
-                )}
-                <span className="flex-1 truncate text-sm text-zinc-700">
-                  {label}
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  value={stock[key] ?? ""}
-                  placeholder="0"
-                  onChange={(e) =>
-                    setStock((prev) => ({
-                      ...prev,
-                      [key]: Number(e.target.value),
-                    }))
-                  }
-                  className="w-16 rounded-lg border border-zinc-300 px-2 py-1 text-center text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <StockMatrix
+        combos={combos}
+        colorCatalog={colorCatalog}
+        stock={stock}
+        onChange={(key, value) =>
+          setStock((prev) => ({ ...prev, [key]: value }))
+        }
+      />
 
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm text-zinc-700">

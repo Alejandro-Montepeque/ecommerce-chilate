@@ -39,9 +39,9 @@ Requiere el backend corriendo (por defecto en `http://localhost:8080/api`).
 
 ## Variables de entorno
 
-| Variable | Obligatoria | Descripción |
-|----------|:-----------:|-------------|
-| `VITE_API_URL` | ✅ | URL base de la API, incluyendo `/api`. En local: `http://localhost:8080/api`. En prod: la URL de Cloud Run + `/api`. |
+| Variable       | Obligatoria | Descripción                                                                                                          |
+| -------------- | :---------: | -------------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL` |     ✅      | URL base de la API, incluyendo `/api`. En local: `http://localhost:8080/api`. En prod: la URL de Cloud Run + `/api`. |
 
 > Vite **incrusta** las variables `VITE_*` en el build. No son secretas (aquí solo
 > hay una URL pública) y, si cambian, hay que **volver a construir/desplegar**.
@@ -50,13 +50,13 @@ Requiere el backend corriendo (por defecto en `http://localhost:8080/api`).
 
 ## Scripts npm
 
-| Script | Qué hace |
-|--------|----------|
-| `npm run dev` | Servidor de desarrollo (Vite, con HMR). |
-| `npm run build` | `tsc -b && vite build` → genera `dist/`. |
-| `npm run preview` | Sirve el build de producción localmente. |
-| `npm run typecheck` | `tsc --noEmit`. |
-| `npm run lint` / `npm run format` | ESLint / Prettier. |
+| Script                            | Qué hace                                 |
+| --------------------------------- | ---------------------------------------- |
+| `npm run dev`                     | Servidor de desarrollo (Vite, con HMR).  |
+| `npm run build`                   | `tsc -b && vite build` → genera `dist/`. |
+| `npm run preview`                 | Sirve el build de producción localmente. |
+| `npm run typecheck`               | `tsc --noEmit`.                          |
+| `npm run lint` / `npm run format` | ESLint / Prettier.                       |
 
 ---
 
@@ -107,7 +107,7 @@ en `*.queries.ts`. Los componentes consumen los hooks, nunca `axios` directo.
 - `lib/api.ts` centraliza **axios**: añade el token JWT a cada petición, normaliza
   errores y limpia la sesión ante un `401`. Su base es `VITE_API_URL`.
 - **TanStack Query** maneja cache, revalidación y estados de carga/error. Las
-  *queries keys* están centralizadas por feature. Las mutaciones invalidan las
+  _queries keys_ están centralizadas por feature. Las mutaciones invalidan las
   queries afectadas para refrescar la UI automáticamente.
 - Ejemplo: `useDiscountBanner()` consulta `/discounts/banner` cada 60 s para
   encender/apagar el banner de la tienda sin recargar.
@@ -174,7 +174,7 @@ permisos en `features/auth/permissions.ts`.
 ## Build y despliegue (Vercel)
 
 - `npm run build` genera `dist/` (estático).
-- `vercel.json` ya define el build, el `outputDirectory` y el *rewrite* de la SPA
+- `vercel.json` ya define el build, el `outputDirectory` y el _rewrite_ de la SPA
   (todas las rutas → `index.html`).
 - En Vercel: **Root Directory = `frontend`** y variable **`VITE_API_URL`** con la
   URL de Cloud Run + `/api`. Detalle completo en [`../DEPLOYMENT.md`](../DEPLOYMENT.md).

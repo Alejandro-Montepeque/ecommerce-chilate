@@ -12,8 +12,7 @@ import {
   useToggleWishlist,
 } from "@/features/wishlist/wishlist.queries";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Badge, Button } from "@/components/ui";
 import type { Product, ProductVariant } from "@/types";
 
 // Tarjeta de producto: el color se elige con muestras (swatches) seleccionables

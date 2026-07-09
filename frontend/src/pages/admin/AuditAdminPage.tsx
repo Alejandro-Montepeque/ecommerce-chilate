@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useAuditLogs, type AuditLog } from "@/features/audit/audit.queries";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { DataTable } from "@/components/ui/DataTable";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { Badge, Button, DataTable, PageHeader } from "@/components/ui";
 
 const TAKE = 25;
 

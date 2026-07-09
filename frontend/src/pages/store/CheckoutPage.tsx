@@ -15,8 +15,7 @@ import {
   formatPhone,
   onlyDigits,
 } from "@/lib/masks";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button, Input } from "@/components/ui";
 
 export default function CheckoutPage() {
   const { t } = useTranslation();

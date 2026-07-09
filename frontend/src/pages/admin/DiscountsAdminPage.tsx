@@ -5,13 +5,15 @@ import {
   useCreateDiscount,
   useDeleteDiscount,
 } from "@/features/discounts/discounts.queries";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
-import { DataTable } from "@/components/ui/DataTable";
-import { PageHeader } from "@/components/ui/PageHeader";
+import {
+  Badge,
+  Button,
+  Card,
+  DataTable,
+  Input,
+  PageHeader,
+  Select,
+} from "@/components/ui";
 import { alerts } from "@/lib/alerts";
 
 const fmt = (iso: string) =>

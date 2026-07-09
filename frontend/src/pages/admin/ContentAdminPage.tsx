@@ -9,14 +9,10 @@ import {
   type ContentGroup,
 } from "@/features/content/keys";
 import { LogoManager } from "@/features/content/LogoManager";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/ui/Spinner";
+import { Button, Card, Input, Spinner, Textarea } from "@/components/ui";
 import { alerts } from "@/lib/alerts";
 
 type Values = Record<string, { valueEs: string; valueEn: string }>;
-
-const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white p-2.5 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30";
 
 export default function ContentAdminPage() {
   const { data, isLoading } = useSiteContent();
@@ -110,10 +106,7 @@ export default function ContentAdminPage() {
         {keysInTab.map((ck) => {
           const val = values[ck.key] ?? { valueEs: "", valueEn: "" };
           return (
-            <div
-              key={ck.key}
-              className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-card"
-            >
+            <Card key={ck.key} className="p-5">
               <p className="mb-3 text-sm font-medium text-zinc-900">
                 {ck.label}
               </p>
@@ -143,7 +136,7 @@ export default function ContentAdminPage() {
               >
                 Guardar
               </Button>
-            </div>
+            </Card>
           );
         })}
       </div>
@@ -162,27 +155,20 @@ function Field({
   value: string;
   onChange: (v: string) => void;
 }) {
+  if (multiline)
+    return (
+      <Textarea
+        label={langLabel}
+        rows={2}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
   return (
-    <label className="block">
-      {langLabel && (
-        <span className="mb-1 block text-xs font-medium text-zinc-500">
-          {langLabel}
-        </span>
-      )}
-      {multiline ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          rows={2}
-          className={inputClass}
-        />
-      ) : (
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={inputClass}
-        />
-      )}
-    </label>
+    <Input
+      label={langLabel}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }

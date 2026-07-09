@@ -2,8 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { alerts } from "@/lib/alerts";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button, Input } from "@/components/ui";
 
 export default function ChangePasswordPage() {
   const { user, isStaff, changePassword } = useAuth();

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { can, ROLE_LABELS } from "@/features/auth/permissions";
-import { Logo } from "@/components/ui/Logo";
+import { Logo, Spinner } from "@/components/ui";
 
 export function AdminLayout() {
   const { t } = useTranslation();
@@ -131,7 +131,9 @@ export function AdminLayout() {
 
         <main className="min-w-0 flex-1 p-5 sm:p-8">
           <div className="mx-auto max-w-4xl">
-            <Outlet />
+            <Suspense fallback={<Spinner />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

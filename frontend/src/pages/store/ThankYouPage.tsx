@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSiteContent } from "@/features/content/content.queries";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui";
 import type { CartItem } from "@/features/cart/useCart";
 
 interface ThankYouState {

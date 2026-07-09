@@ -4,10 +4,7 @@ import {
   useUpdateProduct,
   useDeleteProduct,
 } from "@/features/products/products.queries";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { DataTable } from "@/components/ui/DataTable";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { Badge, Button, DataTable, PageHeader } from "@/components/ui";
 import { alerts } from "@/lib/alerts";
 import { resolveImageUrl } from "@/features/products/image";
 import type { Product } from "@/types";

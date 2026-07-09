@@ -3,13 +3,14 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/features/wishlist/wishlist.queries";
 import { ProductCard } from "@/features/products/ProductCard";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/ui/Spinner";
+import { Button, EmptyState, Spinner } from "@/components/ui";
+import { useSeo } from "@/lib/seo";
 
 export default function WishlistPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: products = [], isLoading } = useWishlist();
+  const { data: products = [], isLoading, isError } = useWishlist();
+  useSeo({ title: t("wishlist.title") });
 
   if (!user)
     return (
@@ -22,6 +23,7 @@ export default function WishlistPage() {
     );
 
   if (isLoading) return <Spinner />;
+  if (isError) return <EmptyState>{t("common.error")}</EmptyState>;
 
   return (
     <div>

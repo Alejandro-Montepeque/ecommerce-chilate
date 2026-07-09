@@ -9,21 +9,36 @@ import {
 } from "@/features/products/products.queries";
 import { ProductCard } from "@/features/products/ProductCard";
 import { DiscountBanner } from "@/features/discounts/DiscountBanner";
-import { Button } from "@/components/ui/Button";
-import { TruckIcon, ShieldIcon, RefreshIcon } from "@/components/ui/icons";
+import {
+  Button,
+  EmptyState,
+  RefreshIcon,
+  ShieldIcon,
+  TruckIcon,
+} from "@/components/ui";
+import { useSeo } from "@/lib/seo";
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const { data: banners = [] } = useActiveBanners();
   const { data: content = [] } = useSiteContent();
-  const { data: products = [] } = usePublishedProducts();
+  const { data: products = [], isError: productsError } =
+    usePublishedProducts();
   const { data: categories = [] } = useCategories();
 
   const byKey = (key: string) => content.find((c) => c.key === key);
   const hero = byKey("hero_title");
   const heroSub = byKey("hero_subtitle");
   const featured = products.slice(0, 6);
+
+  // El título/descripción para SEO usan el hero editable; si no hay, textos base.
+  useSeo({
+    title: hero ? localized(hero, "value", lang) : t("seo.homeTitle"),
+    description: heroSub
+      ? localized(heroSub, "value", lang)
+      : t("seo.homeDesc"),
+  });
 
   return (
     <div className="space-y-16">
@@ -126,7 +141,9 @@ export default function HomePage() {
             {t("home.viewAll")} →
           </Link>
         </div>
-        {featured.length > 0 ? (
+        {productsError ? (
+          <EmptyState>{t("common.error")}</EmptyState>
+        ) : featured.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((product) => (
               <ProductCard key={product.id} product={product} />

@@ -11,8 +11,8 @@ import {
   subcategoryLabel,
   type Subcategory,
 } from "@/features/products/subcategory";
-import { Spinner } from "@/components/ui/Spinner";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { EmptyState, Spinner } from "@/components/ui";
+import { useSeo } from "@/lib/seo";
 
 export default function ShopPage() {
   const { t, i18n } = useTranslation();
@@ -21,15 +21,10 @@ export default function ShopPage() {
   const { data: categories = [] } = useCategories();
   const [category, setCategory] = useState<string | null>(null);
   const [sub, setSub] = useState<Subcategory | null>(null);
+  useSeo({ title: t("nav.shop"), description: t("seo.shopDesc") });
 
   if (isLoading) return <Spinner />;
-  if (isError)
-    return (
-      <EmptyState>
-        No pudimos cargar los productos. Revisa tu conexión e inténtalo de
-        nuevo.
-      </EmptyState>
-    );
+  if (isError) return <EmptyState>{t("common.error")}</EmptyState>;
 
   const filtered = products.filter(
     (p) =>

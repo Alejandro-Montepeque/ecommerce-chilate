@@ -81,11 +81,22 @@
     "banners": "Banners",
     "content": "Content"
   },
+  "seo": {
+    "homeTitle": "Salvadoran clothing and accessories",
+    "homeDesc": "Discover clothing and accessories with their own style. Shipping across El Salvador, pay on delivery or online.",
+    "shopDesc": "Browse shirts, pants, shoes and accessories for men, women and unisex."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "The page you're looking for doesn't exist or was moved.",
+    "back": "Back to home"
+  },
   "common": {
     "addToCart": "Add to cart",
     "size": "Size",
     "color": "Color",
     "outOfStock": "Out of stock",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "error": "We couldn't load the information. Check your connection and try again."
   }
 }

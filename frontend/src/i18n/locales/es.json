@@ -81,11 +81,22 @@
     "banners": "Banners",
     "content": "Contenido"
   },
+  "seo": {
+    "homeTitle": "Ropa y accesorios salvadoreños",
+    "homeDesc": "Descubre ropa y accesorios con estilo propio. Envío a todo El Salvador, con pago contra entrega o en línea.",
+    "shopDesc": "Explora camisas, pantalones, zapatos y accesorios para hombre, mujer y unisex."
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "text": "La página que buscas no existe o fue movida.",
+    "back": "Volver al inicio"
+  },
   "common": {
     "addToCart": "Agregar al carrito",
     "size": "Talla",
     "color": "Color",
     "outOfStock": "Agotado",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "error": "No pudimos cargar la información. Revisa tu conexión e inténtalo de nuevo."
   }
 }

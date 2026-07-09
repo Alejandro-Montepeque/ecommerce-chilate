@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { APP_FILTER } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { validateEnv } from "./config/env.validation";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -25,6 +26,10 @@ import { HealthController } from "./health.controller";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
+    // Configuración base de rate limiting. Solo se aplica en las rutas que
+    // activan ThrottlerGuard (p. ej. login), no de forma global, para no
+    // afectar la navegación ni el proxy de imágenes.
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 20 }]),
     PrismaModule,
     AuthModule,
     UsersModule,

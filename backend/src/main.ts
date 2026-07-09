@@ -3,6 +3,7 @@ import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { json, urlencoded } from "express";
+import helmet from "helmet";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
@@ -11,6 +12,14 @@ async function bootstrap() {
     bodyParser: false,
   });
   const config = app.get(ConfigService);
+
+  // Cloud Run corre detrás de un balanceador: confiamos en el primer proxy para
+  // que req.ip sea la IP real del cliente (necesario para el rate limiting).
+  app.set("trust proxy", 1);
+
+  // Cabeceras de seguridad HTTP. Relajamos la política de recursos cruzados a
+  // "cross-origin" porque el frontend (otro dominio) carga imágenes vía proxy.
+  app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
   // Límite de body moderado. Las imágenes van por multipart a /uploads;
   // este límite solo cubre datos del producto y el respaldo base64 (<= 2 MB).

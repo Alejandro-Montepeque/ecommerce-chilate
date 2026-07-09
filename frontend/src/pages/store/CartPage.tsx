@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/features/cart/useCart";
 import { resolveImageUrl } from "@/features/products/image";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui";
 
 export default function CartPage() {
   const { t } = useTranslation();

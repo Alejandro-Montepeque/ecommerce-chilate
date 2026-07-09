@@ -4,9 +4,7 @@ import {
   useCreateBanner,
   useDeleteBanner,
 } from "@/features/banners/banners.queries";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Spinner } from "@/components/ui/Spinner";
+import { Button, Input, Spinner } from "@/components/ui";
 import { alerts } from "@/lib/alerts";
 
 export default function BannersAdminPage() {

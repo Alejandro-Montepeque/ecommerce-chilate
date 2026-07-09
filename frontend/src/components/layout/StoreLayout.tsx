@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/features/cart/useCart";
 import { useSiteContent } from "@/features/content/content.queries";
-import { Logo } from "@/components/ui/Logo";
+import { Logo, Spinner } from "@/components/ui";
 import { localized } from "@/i18n";
 
 export function StoreLayout() {
@@ -147,7 +147,9 @@ export function StoreLayout() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:py-10">
-        <Outlet />
+        <Suspense fallback={<Spinner />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="border-t border-zinc-200 bg-white">

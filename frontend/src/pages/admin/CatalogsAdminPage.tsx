@@ -10,21 +10,9 @@ import {
   useCreateCategory,
   useDeleteCategory,
 } from "@/features/catalog/catalog.queries";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Spinner } from "@/components/ui/Spinner";
+import { Button, Card, Input, Spinner } from "@/components/ui";
+import { slugify } from "@/lib/slugify";
 import { alerts } from "@/lib/alerts";
-
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-const card = "rounded-2xl border border-zinc-200 bg-white p-6 shadow-card";
 
 export default function CatalogsAdminPage() {
   return (
@@ -68,7 +56,7 @@ function Categories() {
   };
 
   return (
-    <section className={card}>
+    <Card className="p-6">
       <p className="mb-4 text-sm font-medium text-zinc-900">Categorías</p>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
         <Input
@@ -110,7 +98,7 @@ function Categories() {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -137,7 +125,7 @@ function Colors() {
   };
 
   return (
-    <section className={card}>
+    <Card className="p-6">
       <p className="mb-4 text-sm font-medium text-zinc-900">Colores</p>
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <Input
@@ -188,7 +176,7 @@ function Colors() {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -210,7 +198,7 @@ function Sizes() {
   };
 
   return (
-    <section className={card}>
+    <Card className="p-6">
       <p className="mb-4 text-sm font-medium text-zinc-900">Tallas</p>
       <div className="mb-4 flex items-end gap-3">
         <Input
@@ -250,6 +238,6 @@ function Sizes() {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
