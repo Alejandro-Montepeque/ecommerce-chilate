@@ -3,6 +3,7 @@ dist
 .env
 .env.local
 *.log
+*.tsbuildinfo
 
 # Credenciales de Google Cloud (¡nunca subir!)
 ecommercechilate-*.json

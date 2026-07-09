@@ -3,3 +3,6 @@ dist
 .env
 .env.*
 npm-debug.log
+# Info de compilación incremental de TypeScript: NO debe entrar al build, o tsc
+# cree que no hay nada que recompilar y no emite dist.
+*.tsbuildinfo
