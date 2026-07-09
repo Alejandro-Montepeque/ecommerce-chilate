@@ -80,6 +80,7 @@ jobs:
         run: |
           cat > "$RUNNER_TEMP/env.yaml" <<EOF
           DATABASE_URL: "${{ secrets.DATABASE_URL }}"
+          DIRECT_URL: "${{ secrets.DIRECT_URL }}"
           JWT_SECRET: "${{ secrets.JWT_SECRET }}"
           JWT_EXPIRES_IN: "7d"
           CORS_ORIGINS: "${{ secrets.CORS_ORIGINS }}"
